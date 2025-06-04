@@ -1,0 +1,37 @@
+# 🐍 Python
+__pycache__/
+*.pyc
+
+# 🧪 Virtual Environment
+venv/
+
+# ⚙️ IDE
+.vscode/
+.idea/
+
+# 📂 Temporary / Session data
+cookies/
+sessions/
+results/
+data/
+
+# 📊 Exported data
+*.json
+!assets/cheatsheet/xss_cheatsheet.json
+!user_settings.json
+!Exploits/CVE-TEST-001/metadata.json
+!Exploits/CVE-TEST-002/metadata.json
+*.csv
+*.png
+*.log
+*.txt
+!requirements.txt
+*.html
+*.env
+
+# 🧱 UI leftovers
+*.ui~
+
+# 💻 OS trash
+.DS_Store
+Thumbs.db
