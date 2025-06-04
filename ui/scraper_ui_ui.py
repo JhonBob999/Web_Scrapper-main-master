@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:\Users\rusla\Desktop\Web_Scrapper-main\Web_Scrapper-main\ui\scraper_ui.ui'
+# Form implementation generated from reading ui file 'c:\Users\rusla\Desktop\Web_Scrapper-main-master\Web_Scrapper-main-master\ui\scraper_ui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.11
 #
