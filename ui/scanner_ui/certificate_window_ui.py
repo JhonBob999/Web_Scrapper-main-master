@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:\Users\rusla\Desktop\Web_Scrapper-main-master\Web_Scrapper-main-master\ui\scanner_ui\certificate_window.ui'
+# Form implementation generated from reading ui file 'ui/scanner_ui/certificate_window.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.11
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_certificateWindows(object):
     def setupUi(self, certificateWindows):
         certificateWindows.setObjectName("certificateWindows")
-        certificateWindows.setWindowModality(QtCore.Qt.WindowModal)
+        certificateWindows.setWindowModality(QtCore.Qt.NonModal)
         certificateWindows.setEnabled(True)
         certificateWindows.resize(1278, 801)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -26,6 +26,7 @@ class Ui_certificateWindows(object):
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(12)
         font.setBold(True)
+        font.setWeight(75)
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         certificateWindows.setFont(font)
         certificateWindows.setStyleSheet("QMainWindow {\n"
@@ -44,6 +45,7 @@ class Ui_certificateWindows(object):
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(18)
         font.setBold(True)
+        font.setWeight(75)
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.labelCert.setFont(font)
         self.labelCert.setStyleSheet("QLabel {\n"
@@ -61,6 +63,7 @@ class Ui_certificateWindows(object):
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(13)
         font.setBold(True)
+        font.setWeight(75)
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.pushButtonScanStop.setFont(font)
         self.pushButtonScanStop.setStyleSheet("QPushButton#pushButtonScanStop {\n"
@@ -87,6 +90,7 @@ class Ui_certificateWindows(object):
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(10)
         font.setBold(True)
+        font.setWeight(75)
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.tabWidget.setFont(font)
         self.tabWidget.setStyleSheet("")
@@ -96,6 +100,7 @@ class Ui_certificateWindows(object):
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(10)
         font.setBold(True)
+        font.setWeight(75)
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.TreeWidgetDomain.setFont(font)
         self.TreeWidgetDomain.setStyleSheet("")
@@ -206,6 +211,7 @@ class Ui_certificateWindows(object):
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(10)
         font.setBold(True)
+        font.setWeight(75)
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.plainTextEditCertificateLogs.setFont(font)
         self.plainTextEditCertificateLogs.setStyleSheet("QTextBrowser {\n"
@@ -226,6 +232,7 @@ class Ui_certificateWindows(object):
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(12)
         font.setBold(True)
+        font.setWeight(75)
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.progressBarCertificateScan.setFont(font)
         self.progressBarCertificateScan.setStyleSheet("QProgressBar {\n"
@@ -251,6 +258,7 @@ class Ui_certificateWindows(object):
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(13)
         font.setBold(True)
+        font.setWeight(75)
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.pushButtonCleanLogs.setFont(font)
         self.pushButtonCleanLogs.setStyleSheet("QPushButton {\n"
@@ -274,7 +282,7 @@ class Ui_certificateWindows(object):
         self.gridLayout.addWidget(self.pushButtonCleanLogs, 0, 2, 1, 1)
         certificateWindows.setCentralWidget(self.centralwidget)
         self.menuBar = QtWidgets.QMenuBar(certificateWindows)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1278, 22))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1278, 24))
         self.menuBar.setObjectName("menuBar")
         self.menuConvertor = QtWidgets.QMenu(self.menuBar)
         self.menuConvertor.setObjectName("menuConvertor")
@@ -285,7 +293,7 @@ class Ui_certificateWindows(object):
         self.menuBar.addAction(self.menuConvertor.menuAction())
 
         self.retranslateUi(certificateWindows)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(certificateWindows)
 
     def retranslateUi(self, certificateWindows):

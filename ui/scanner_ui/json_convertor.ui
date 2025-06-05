@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1269</width>
+    <width>1274</width>
     <height>782</height>
    </rect>
   </property>
@@ -114,8 +114,8 @@ QTreeWidget::item:selected {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1269</width>
-     <height>25</height>
+     <width>1274</width>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFiles">
