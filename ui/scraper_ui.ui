@@ -620,7 +620,7 @@ QToolBar::separator {
          </font>
         </property>
         <property name="text">
-         <string>Choose payload</string>
+         <string>XSS Payloads by Context</string>
         </property>
        </widget>
       </widget>

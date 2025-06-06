@@ -520,7 +520,7 @@ class Ui_MainWindow(object):
         self.payload_combox.setItemText(2, _translate("MainWindow", "attribute"))
         self.payload_combox.setItemText(3, _translate("MainWindow", "url_param"))
         self.payload_combox.setItemText(4, _translate("MainWindow", "dom"))
-        self.payload_lbl.setText(_translate("MainWindow", "Choose payload"))
+        self.payload_lbl.setText(_translate("MainWindow", "XSS Payloads by Context"))
         self.tabWidgetExploits.setTabText(self.tabWidgetExploits.indexOf(self.tabBrowserXSS), _translate("MainWindow", "Browser-based XSS"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_exploit), _translate("MainWindow", "Exploits"))
         self.lbl_export_settings.setText(_translate("MainWindow", "Format:"))

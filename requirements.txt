@@ -54,3 +54,4 @@ websocket-client
 wsproto
 yarl
 pandas
+pyperclip

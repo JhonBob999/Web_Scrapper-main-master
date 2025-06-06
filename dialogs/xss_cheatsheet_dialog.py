@@ -1,8 +1,9 @@
-from PyQt5.QtWidgets import QDialog, QListWidget, QVBoxLayout, QTextBrowser, QHBoxLayout
+from PyQt5.QtWidgets import QDialog, QListWidget, QVBoxLayout, QTextBrowser, QHBoxLayout, QComboBox, QLabel
 from core.xss_payload_manager import load_xss_payloads
 import json
 import os
 import html as html_utils
+import pyperclip
 
 CHEATSHEET_PATH = os.path.join("assets", "cheatsheet", "xss_cheatsheet.json")
 
@@ -12,18 +13,22 @@ class XssCheatsheetDialog(QDialog):
         self.setWindowTitle("🧠 XSS Cheatsheet")
         self.setMinimumSize(800, 500)
 
+        # Левая панель — список техник XSS
         self.listWidget = QListWidget()
+
+        # Правая панель — описание + примеры
         self.textBrowser = QTextBrowser()
 
-        layout = QHBoxLayout()
-        layout.addWidget(self.listWidget, 1)
-        layout.addWidget(self.textBrowser, 3)
-        self.setLayout(layout)
+        # Layout — только 2 панели: список и описание
+        main_layout = QHBoxLayout()
+        main_layout.addWidget(self.listWidget, 1)
+        main_layout.addWidget(self.textBrowser, 3)
+        self.setLayout(main_layout)
 
+        # Логика — только для справки!
         self.cheats = self.load_cheatsheet()
         self.populate_list()
         self.listWidget.currentItemChanged.connect(self.display_cheat)
-        self.load_payloads("html_body")  # Проверяем при запуске окна
 
     def load_cheatsheet(self):
         if not os.path.exists(CHEATSHEET_PATH):
@@ -58,10 +63,4 @@ class XssCheatsheetDialog(QDialog):
                     html += "</pre></p>"
                 self.textBrowser.setHtml(html)
                 break
-
-    def load_payloads(self, context):
-        payloads = load_xss_payloads(context)
-        # теперь payloads — это список словарей {"payload": "...", "desc": "..."}
-        # можешь выводить их в таблицу, список или где тебе нужно
-        for item in payloads:
-            print(item["payload"], "—", item["desc"])
+            
