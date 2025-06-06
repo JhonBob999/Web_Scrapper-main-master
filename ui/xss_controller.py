@@ -17,6 +17,9 @@ class XssController:
         self.ui.btnRunXss.clicked.connect(self.run_xss_exploit)
         self.ui.payload_combox.currentTextChanged.connect(self.load_payloads)
         self.ui.Payload_listWidget.itemClicked.connect(self.insert_payload_to_field)
+        self.ui.payload_search.textChanged.connect(self.filter_payloads)
+        self.ui.filter_btn.clicked.connect(self.clear_payload_filter)
+
 
     def run_xss_exploit(self):
         target = self.ui.lineEditXssTarget.text().strip()
@@ -53,6 +56,10 @@ class XssController:
 
     def load_payloads(self, context):
         payloads = load_xss_payloads(context)
+        self.current_payloads = payloads  # сохраняем оригинальный список
+        self.display_payloads(payloads)
+
+    def display_payloads(self, payloads):
         self.ui.Payload_listWidget.clear()
         for item in payloads:
             self.ui.Payload_listWidget.addItem(f"{item['payload']} — {item['desc']}")
@@ -60,3 +67,17 @@ class XssController:
     def insert_payload_to_field(self, item):
         payload = item.text().split(" — ")[0]
         self.ui.plainTextPayload.setPlainText(payload)
+        
+    def filter_payloads(self):
+        query = self.ui.payload_search.text().lower()
+        filtered = []
+        for item in getattr(self, 'current_payloads', []):
+            # Фильтруем по payload и description
+            if query in item['payload'].lower() or query in item['desc'].lower():
+                filtered.append(item)
+        self.display_payloads(filtered)
+    
+    def clear_payload_filter(self):
+        self.ui.payload_search.clear()
+        self.display_payloads(getattr(self, 'current_payloads', []))
+
