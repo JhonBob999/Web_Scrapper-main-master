@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QListWidgetItem
 from core.xss_payload_manager import load_xss_payloads
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -62,7 +62,9 @@ class XssController:
     def display_payloads(self, payloads):
         self.ui.Payload_listWidget.clear()
         for item in payloads:
-            self.ui.Payload_listWidget.addItem(f"{item['payload']} — {item['desc']}")
+            list_item = QListWidgetItem(item['payload'])
+            list_item.setToolTip(item['desc'])
+            self.ui.Payload_listWidget.addItem(list_item)
 
     def insert_payload_to_field(self, item):
         payload = item.text().split(" — ")[0]
