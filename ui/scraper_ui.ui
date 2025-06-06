@@ -548,7 +548,7 @@ QToolBar::separator {
          </font>
         </property>
         <property name="text">
-         <string>JS + DOM CRIB</string>
+         <string>XSS Cheatsheet</string>
         </property>
        </widget>
        <widget class="QComboBox" name="payload_combox">
@@ -655,6 +655,24 @@ QToolBar::separator {
         </property>
         <property name="text">
          <string>Clear Filter</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="params_btn">
+        <property name="geometry">
+         <rect>
+          <x>590</x>
+          <y>410</y>
+          <width>181</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Params cheatsheet</string>
         </property>
        </widget>
       </widget>

@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMessageBox, QListWidgetItem
 from core.xss_payload_manager import load_xss_payloads
+from dialogs.params_cheatsheet_dialog import ParamsCheatsheetDialog
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -7,8 +8,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 import webbrowser, urllib.parse
 
 class XssController:
-    def __init__(self, ui):
+    def __init__(self, ui, parent_widget=None):
         self.ui = ui
+        self.parent_widget = parent_widget
         self.setup_connections()
         self.ui.payload_combox.setCurrentText("html_body")
         self.load_payloads("html_body")
@@ -19,6 +21,7 @@ class XssController:
         self.ui.Payload_listWidget.itemClicked.connect(self.insert_payload_to_field)
         self.ui.payload_search.textChanged.connect(self.filter_payloads)
         self.ui.filter_btn.clicked.connect(self.clear_payload_filter)
+        self.ui.params_btn.clicked.connect(self._open_params_cheatsheet)
 
 
     def run_xss_exploit(self):
@@ -82,4 +85,13 @@ class XssController:
     def clear_payload_filter(self):
         self.ui.payload_search.clear()
         self.display_payloads(getattr(self, 'current_payloads', []))
+        
+    def _open_params_cheatsheet(self):
+        # Предположим, что у вас есть LineEdit: self.ui.lineEditXssTarget
+        # Это реально виджет и у него есть метод window() → вернёт главное окно.
+        parent_widget = self.ui.lineEditXssTarget.window()
+        dialog = ParamsCheatsheetDialog(parent_widget)
+        dialog.exec_()
+
+
 
