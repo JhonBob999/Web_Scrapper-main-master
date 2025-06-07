@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMessageBox, QListWidgetItem
+from PyQt5.QtWidgets import QMessageBox, QListWidgetItem, QApplication
 from core.xss_payload_manager import load_xss_payloads
 from dialogs.params_cheatsheet_dialog import ParamsCheatsheetDialog
 from dialogs.payload_history_dialog import PayloadHistoryDialog
@@ -7,7 +7,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import webbrowser, urllib.parse
-import json, os
+import json, os, requests, time
 
 class XssController:
     def __init__(self, ui, parent_widget=None):
@@ -25,6 +25,7 @@ class XssController:
         self.ui.filter_btn.clicked.connect(self.clear_payload_filter)
         self.ui.params_btn.clicked.connect(self._open_params_cheatsheet)
         self.ui.history_btn.clicked.connect(self._open_history)
+        self.ui.runAllBtn.clicked.connect(self._run_all_payloads)
 
 
     def run_xss_exploit(self):
@@ -94,13 +95,137 @@ class XssController:
         self.ui.payload_search.clear()
         self.display_payloads(getattr(self, 'current_payloads', []))
         
-    def _open_params_cheatsheet(self):
-        # Предположим, что у вас есть LineEdit: self.ui.lineEditXssTarget
-        # Это реально виджет и у него есть метод window() → вернёт главное окно.
-        parent_widget = self.ui.lineEditXssTarget.window()
-        dialog = ParamsCheatsheetDialog(parent_widget)
-        dialog.exec_()
         
+    def _run_all_payloads(self):
+        """
+        Автоматически подставляет и тестирует каждый payload из QListWidget,
+        выводит подробные логи в response_textEdit и накапливает все payload в plainTextPayload.
+        """
+        # 1) Собираем все payload-ы из QListWidget
+        list_widget = self.ui.Payload_listWidget
+        count = list_widget.count()
+        if count == 0:
+            self.ui.response_textEdit.clear()
+            self.ui.response_textEdit.insertPlainText("No payloads in list to run.")
+            return
+        payloads = [list_widget.item(i).text() for i in range(count)]
+        total = len(payloads)
+
+        # 2) Очистка полей и начальный лог
+        self.ui.response_textEdit.clear()
+        self.ui.response_textEdit.insertPlainText(f"Starting Run All ({total} payloads)\n")
+        self.ui.plainTextPayload.clear()
+
+        # 3) Прогресс-бар
+        self._show_progress(total)
+
+        results = []
+        for idx, payload in enumerate(payloads, start=1):
+            # 4) Накопление payload-ов в plainTextPayload
+            self.ui.plainTextPayload.appendPlainText(payload)
+
+            # 5) Формируем URL
+            target = self.ui.lineEditXssTarget.text().strip()
+            param  = self.ui.lineEditParamName.text().strip()
+            encoded = urllib.parse.quote(payload)
+            url = f"http://{target}?{param}={encoded}"
+
+            # 6) Тестируем payload
+            success, status, elapsed = self._test_payload(payload)
+            results.append({
+                "payload": payload,
+                "success": success,
+                "status": status,
+                "time_ms": elapsed
+            })
+
+            # 7) Логируем в response_textEdit
+            self.ui.response_textEdit.insertPlainText(
+                f"[{idx}/{total}] Payload: {payload}\n"
+                f"    URL: {url}\n"
+                f"    Status: {status}  Elapsed: {elapsed:.1f}ms  Success: {success}\n"
+            )
+
+            # 8) Обновляем прогресс-бар
+            self._update_progress(idx)
+
+        # 9) Скрываем прогресс-бар и сохраняем результаты
+        self._hide_progress()
+        self.last_run_results = results
+
+        # 10) Итоговое уведомление
+        self._show_run_summary(results)
+
+
+    def _get_payloads_for_context(self, context_name: str) -> list[str]:
+        # контексты: Reflected, Stored, DOM
+        filename = {
+            "html_body": "xss_htmlbody.json",
+            "js":    "xss_js.json",
+            "attribute": "xss_attribute.json",
+            "url_param": "xss_urlparam.json",
+            "dom": "xss_params_dom.json"
+            
+        }.get(context_name)
+        if not filename:
+            return []
+
+        path = os.path.join(os.path.dirname(__file__), "..", "assets", "cheatsheet", filename)
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        # предположим, у каждого объекта есть ключ "payload"
+        return [item["payload"] for item in data if isinstance(item, dict) and "payload" in item]
+    
+    def _test_payload(self, payload: str):
+        """
+        Синхронно проверяет один payload:
+        - Формирует URL по текущему target и param_name
+        - Делаем HTTP GET
+        - Возвращает (success, status_code, elapsed_ms)
+        """
+        target = self.ui.lineEditXssTarget.text().strip()
+        param = self.ui.lineEditParamName.text().strip() or "q"
+        if not target:
+            return False, None, 0.0
+
+        # Кодируем payload и собираем URL
+        encoded = urllib.parse.quote(payload)
+        url = f"http://{target}?{param}={encoded}"
+
+        start = time.time()
+        try:
+            resp = requests.get(url, timeout=10)
+            elapsed = (time.time() - start) * 1000  # в миллисекундах
+            # Условие успешности можно подправить:
+            success = resp.status_code == 200 and payload in resp.text
+            return success, resp.status_code, elapsed
+        except Exception as e:
+            # В случае ошибки сети или таймаута
+            return False, None, (time.time() - start) * 1000
+    
+    
+    def _show_run_summary(self, results):
+        success_count = sum(1 for r in results if r["success"])
+        total = len(results)
+        parent = self.ui.lineEditXssTarget.window()
+        QMessageBox.information(
+            parent, 
+            "Run All Results",
+            f"Successfully injected {success_count}/{total} payloads."
+        )
+
+    def _show_progress(self, total):
+        self.ui.progressBar.setMaximum(total)
+        self.ui.progressBar.setValue(0)
+        self.ui.progressBar.show()
+
+    def _update_progress(self, count):
+        self.ui.progressBar.setValue(count)
+        QApplication.processEvents()  # чтобы прогресс обновился в UI
+
+    def _hide_progress(self):
+        self.ui.progressBar.hide()
+
     def _open_history(self):
         # parent берём из реального виджета, например:
         parent_widget = self.ui.lineEditXssTarget.window()
@@ -133,6 +258,12 @@ class XssController:
         hist.insert(0, payload)
         self._save_history(hist)
 
+    def _open_params_cheatsheet(self):
+        # Предположим, что у вас есть LineEdit: self.ui.lineEditXssTarget
+        # Это реально виджет и у него есть метод window() → вернёт главное окно.
+        parent_widget = self.ui.lineEditXssTarget.window()
+        dialog = ParamsCheatsheetDialog(parent_widget)
+        dialog.exec_()
 
 
 
