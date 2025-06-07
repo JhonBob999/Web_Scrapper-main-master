@@ -27,6 +27,16 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from core.xss_payload_manager import load_xss_payloads
 from core.js_tree_loader import load_domain_tree
+
+from utils.xss_utils import (
+    build_test_url,
+    get_listwidget_payloads,
+    log_response,
+    test_payload,
+    add_to_payload_history
+)
+
+
 from dialogs.params_cheatsheet_dialog import ParamsCheatsheetDialog
 from dialogs.payload_history_dialog import PayloadHistoryDialog
 
@@ -144,40 +154,6 @@ class XssController:
             if os.path.isdir(full_path):
                 self.ui.domain_combox.addItem(name)
 
-    # ─── РЕФАКТОРИНГ: ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ──────────────────────────────────
-
-    def _get_all_list_payloads(self) -> list[str]:
-        """
-        Считывает все payload из QListWidget и возвращает их в виде списка строк.
-        """
-        lw = self.ui.Payload_listWidget
-        return [lw.item(i).text() for i in range(lw.count())]
-
-
-    def _build_test_url(self, payload: str) -> str:
-        """
-        Строит URL вида http://<target>?<param>=<encoded_payload>
-        """
-        target = self.ui.lineEditXssTarget.text().strip()
-        param  = self.ui.lineEditParamName.text().strip() or "q"
-        encoded = urllib.parse.quote(payload)
-        return f"http://{target}?{param}={encoded}"
-
-
-    def _log_response(self, idx: int, total: int, payload: str,
-                      url: str, status: int, elapsed: float, success: bool):
-        """
-        Записывает одну строку лога в response_textEdit.
-        """
-        self.ui.response_textEdit.insertPlainText(
-            f"[{idx}/{total}] Payload: {payload}\n"
-            f"    URL: {url}\n"
-            f"    Status: {status}  Elapsed: {elapsed:.1f}ms  Success: {success}\n"
-        )
-
-
-    # ─── КОНЕЦ РЕФАКТОРИНГА ─────────────────────────────────────────────────────
-
 
     def run_xss_exploit(self):
         """
@@ -194,7 +170,9 @@ class XssController:
             return
 
         # собираем URL
-        full_url = self._build_test_url(payload)
+        target = self.ui.lineEditXssTarget.text().strip()
+        param = self.ui.lineEditParamName.text().strip() or "q"
+        full_url = build_test_url(payload, target, param)
         headless = self.ui.chkHeadless.isChecked()
 
         try:
@@ -214,37 +192,14 @@ class XssController:
             self.ui.response_textEdit.append(f"[XSS] Loaded in browser: {full_url}")
 
             # сохраняем в историю
-            self._add_to_history(payload)
+            add_to_payload_history(payload)
 
         except Exception as e:
             self.ui.response_textEdit.append(f"[ERROR] {str(e)}")
         finally:
             driver.quit()
             
-            
-########### SYNCHRONIZING TESTING ONE PAYLOAD FROM REQUEST ################
-########### SYNCHRONIZING TESTING ONE PAYLOAD FROM REQUEST ################
-        
-    def _test_payload(self, payload: str):
-        """
-        Синхронное тестирование одного payload-а через requests.
-        Возвращает (success: bool, status: int, elapsed_ms: float).
-        """
-        target = self.ui.lineEditXssTarget.text().strip()
-        if not target:
-            return False, None, 0.0
 
-        # именно URL уже строим через _build_test_url
-        url = self._build_test_url(payload)
-
-        start = time.time()
-        try:
-            resp = requests.get(url, timeout=10)
-            elapsed = (time.time() - start) * 1000
-            success = (resp.status_code == 200 and payload in resp.text)
-            return success, resp.status_code, elapsed
-        except Exception:
-            return False, None, (time.time() - start) * 1000
         
 ########### ALL PAYLOADS RUNING BLOCK ################
 ########### ALL PAYLOADS RUNING BLOCK ################
@@ -312,7 +267,7 @@ class XssController:
         - Накопление их в plainTextPayload и логирование через сигналы потока
         - Обновление прогресс-бара
         """
-        payloads = self._get_all_list_payloads()
+        payloads = get_listwidget_payloads(self.ui.Payload_listWidget)
         total = len(payloads)
 
         if total == 0:
@@ -328,10 +283,19 @@ class XssController:
         # Подготовка и запуск потока
         self.run_thread = XssRunAllThread(
             payloads=payloads,
-            build_url_callback=self._build_test_url,
-            test_payload_callback=self._test_payload,
+            build_url_callback=lambda payload: build_test_url(
+                payload,
+                self.ui.lineEditXssTarget.text().strip(),
+                self.ui.lineEditParamName.text().strip() or "q"
+            ),
+            test_payload_callback=lambda payload: test_payload(
+                payload,
+                self.ui.lineEditXssTarget.text().strip(),
+                self.ui.lineEditParamName.text().strip() or "q"
+            ),
             parent=self.parent_widget
         )
+
         # каждый log_entry будем обрабатывать вот этим слотом
         self.run_thread.log_entry.connect(self._on_thread_log)
         # по завершении — вот этим
@@ -354,7 +318,7 @@ class XssController:
         # накапливаем payload-ы в поле
         self.ui.plainTextPayload.appendPlainText(payload)
         # единый формат логов
-        self._log_response(idx, total, payload, url, status, elapsed, success)
+        log_response(self.ui.response_textEdit, idx, total, payload, url, status, elapsed, success)
         # обновляем бар
         self._update_progress(idx)
 
@@ -416,37 +380,6 @@ class XssController:
         dlg = PayloadHistoryDialog(parent)
         dlg.exec_()
 
-
-    def _history_path(self) -> str:
-        """Возвращает путь до файла с историей."""
-        return os.path.join(
-            os.path.dirname(__file__), "..", "data", "payload_history.json"
-        )
-
-
-    def _load_history(self) -> list[str]:
-        """Загружает из файла список последних payload-ов."""
-        try:
-            with open(self._history_path(), "r", encoding="utf-8") as f:
-                return json.load(f).get("history", [])
-        except (FileNotFoundError, json.JSONDecodeError):
-            return []
-
-
-    def _save_history(self, history: list[str]):
-        """Сохраняет не более 10 последних записей истории."""
-        data = {"history": history[:10]}
-        with open(self._history_path(), "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-    def _add_to_history(self, payload: str):
-        """Добавляет payload в начало истории, убирая дубликаты."""
-        hist = self._load_history()
-        if payload in hist:
-            hist.remove(payload)
-        hist.insert(0, payload)
-        self._save_history(hist)
 
 ########### PARAMS CHEATSHEET BACK TO PARENT WIDGET ################
 ########### PARAMS CHEATSHEET BACK TO PARENT WIDGET ################
