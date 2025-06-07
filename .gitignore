@@ -18,6 +18,7 @@ data/
 # 📊 Exported data
 *.json
 !assets/cheatsheet/xss_cheatsheet.json
+!data/payload_history.json
 !user_settings.json
 !Exploits/CVE-TEST-001/metadata.json
 !Exploits/CVE-TEST-002/metadata.json
