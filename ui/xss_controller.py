@@ -6,18 +6,27 @@ import time
 import requests
 import urllib.parse
 import webbrowser
+import subprocess
 
 from PyQt5.QtWidgets import (
     QMessageBox,
     QListWidgetItem,
-    QApplication
+    QApplication,
+    QMenu,
+    QAction
 )
+
+from PyQt5.QtCore import (
+    Qt
+)
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 from core.xss_payload_manager import load_xss_payloads
+from core.js_tree_loader import load_domain_tree
 from dialogs.params_cheatsheet_dialog import ParamsCheatsheetDialog
 from dialogs.payload_history_dialog import PayloadHistoryDialog
 
@@ -47,7 +56,93 @@ class XssController:
         self.ui.params_btn.clicked.connect(self._open_params_cheatsheet)
         self.ui.history_btn.clicked.connect(self._open_history)
         self.ui.runAllBtn.clicked.connect(self._run_all_payloads)
+        #Testing JS Files
+        self.ui.domain_combox.currentTextChanged.connect(self.on_domain_selected)
+        self.load_available_domains()
+        #TREEWIDGET CONTEXT MENU
+        self.ui.tree_domain.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.tree_domain.customContextMenuRequested.connect(self.show_tree_context_menu)
 
+###### TREEWIDGET CONTEXT MENU CONNECTION ###########
+###### TREEWIDGET CONTEXT MENU CONNECTION ###########
+
+    def show_tree_context_menu(self, position):
+        item = self.ui.tree_domain.itemAt(position)
+        if not item or not item.parent():  # проверяем, что это .js файл, а не домен
+            return
+
+        parent_item = item.parent()
+        domain = parent_item.text(0)
+        script_name = item.text(0)
+
+        menu = QMenu()
+
+        # Пункт 1 — Print Info
+        action_print = QAction("Print file info", self.ui.tree_domain)
+        action_print.triggered.connect(lambda: self.print_file_info(domain, script_name))
+        menu.addAction(action_print)
+
+        # Пункт 2 — Open JS file
+        action_open = QAction("Open JS file (if exists)", self.ui.tree_domain)
+        action_open.triggered.connect(lambda: self.open_js_file(domain, script_name))
+        menu.addAction(action_open)
+
+        menu.exec_(self.ui.tree_domain.viewport().mapToGlobal(position))
+        
+        
+    def print_file_info(self, domain, filename):
+        print(f"[INFO] JS File: {filename} from {domain}")
+
+    def open_js_file(self, domain, filename):
+        path = os.path.join("data", "js_downloads", domain, filename)
+        if not os.path.exists(path):
+            print(f"[WARNING] File not found: {path}")
+            return
+
+        try:
+            if os.name == 'nt':  # Windows
+                os.startfile(path)
+            elif os.name == 'posix':  # Linux/macOS
+                subprocess.Popen(["xdg-open", path])
+        except Exception as e:
+            print(f"[ERROR] Failed to open file: {e}")
+
+######## DOMAIN_COMBOX SELECTION #########
+######## DOMAIN_COMBOX SELECTION #########
+
+    def on_domain_selected(self, domain_name):
+        base_path = f"data/exploits/{domain_name}"
+        
+        if not os.path.exists(base_path):
+            print(f"[ERROR] Domain folder not found: {base_path}")
+            return
+
+        # Ищем .json файл в папке
+        json_file = None
+        for file in os.listdir(base_path):
+            if file.endswith(".json"):
+                json_file = os.path.join(base_path, file)
+                break
+
+        if not json_file:
+            QMessageBox.warning(None, "JSON not found", f"No .json file found in {base_path}")
+            return
+
+        print(f"[INFO] Loading: {json_file}")
+        load_domain_tree(self.ui.tree_domain, json_file)
+        
+######## DOMAIN_COMBOX LOADING #########       
+######## DOMAIN_COMBOX LOADING ######### 
+        
+    def load_available_domains(self):
+        exploits_path = "data/exploits"
+        if not os.path.exists(exploits_path):
+            return
+
+        for name in os.listdir(exploits_path):
+            full_path = os.path.join(exploits_path, name)
+            if os.path.isdir(full_path):
+                self.ui.domain_combox.addItem(name)
 
     # ─── РЕФАКТОРИНГ: ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ──────────────────────────────────
 
