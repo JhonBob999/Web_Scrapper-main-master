@@ -277,10 +277,10 @@ QToolBar::separator {
      <widget class="QTabWidget" name="tabWidgetExploits">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>1271</width>
-        <height>681</height>
+        <x>0</x>
+        <y>0</y>
+        <width>1331</width>
+        <height>701</height>
        </rect>
       </property>
       <property name="currentIndex">
@@ -400,51 +400,52 @@ QToolBar::separator {
       </widget>
       <widget class="QWidget" name="tabBrowserXSS">
        <attribute name="title">
-        <string>Browser-based XSS</string>
+        <string>Browser-based</string>
        </attribute>
        <widget class="QLineEdit" name="lineEditXssTarget">
         <property name="geometry">
          <rect>
-          <x>480</x>
-          <y>30</y>
+          <x>80</x>
+          <y>10</y>
           <width>291</width>
-          <height>24</height>
+          <height>27</height>
          </rect>
         </property>
        </widget>
        <widget class="QPlainTextEdit" name="plainTextPayload">
         <property name="geometry">
          <rect>
-          <x>0</x>
-          <y>30</y>
-          <width>371</width>
-          <height>371</height>
+          <x>380</x>
+          <y>90</y>
+          <width>331</width>
+          <height>321</height>
          </rect>
         </property>
        </widget>
        <widget class="QPushButton" name="btnRunXss">
         <property name="geometry">
          <rect>
-          <x>390</x>
-          <y>370</y>
-          <width>161</width>
-          <height>31</height>
+          <x>150</x>
+          <y>420</y>
+          <width>221</width>
+          <height>71</height>
          </rect>
         </property>
         <property name="font">
          <font>
+          <pointsize>18</pointsize>
           <bold>true</bold>
          </font>
         </property>
         <property name="text">
-         <string>Run in browser</string>
+         <string>Run </string>
         </property>
        </widget>
        <widget class="QCheckBox" name="chkHeadless">
         <property name="geometry">
          <rect>
-          <x>390</x>
-          <y>410</y>
+          <x>10</x>
+          <y>500</y>
           <width>91</width>
           <height>31</height>
          </rect>
@@ -453,13 +454,13 @@ QToolBar::separator {
          <string>Headless</string>
         </property>
        </widget>
-       <widget class="QTextEdit" name="textEdit">
+       <widget class="QTextEdit" name="response_textEdit">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>0</x>
           <y>90</y>
-          <width>381</width>
-          <height>271</height>
+          <width>371</width>
+          <height>321</height>
          </rect>
         </property>
         <property name="readOnly">
@@ -469,28 +470,9 @@ QToolBar::separator {
        <widget class="QLabel" name="lbl_payload">
         <property name="geometry">
          <rect>
-          <x>0</x>
-          <y>5</y>
-          <width>141</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>-1</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>XSS Payload</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="lbl_target">
-        <property name="geometry">
-         <rect>
-          <x>390</x>
-          <y>20</y>
-          <width>71</width>
+          <x>380</x>
+          <y>60</y>
+          <width>211</width>
           <height>31</height>
          </rect>
         </property>
@@ -501,24 +483,43 @@ QToolBar::separator {
          </font>
         </property>
         <property name="text">
-         <string>Target:</string>
+         <string>Choosen payload</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_target">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>71</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string> Target:</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="lineEditParamName">
         <property name="geometry">
          <rect>
-          <x>480</x>
-          <y>60</y>
+          <x>80</x>
+          <y>40</y>
           <width>291</width>
-          <height>22</height>
+          <height>27</height>
          </rect>
         </property>
        </widget>
        <widget class="QLabel" name="lbl_params">
         <property name="geometry">
          <rect>
-          <x>390</x>
-          <y>60</y>
+          <x>0</x>
+          <y>40</y>
           <width>81</width>
           <height>21</height>
          </rect>
@@ -530,15 +531,15 @@ QToolBar::separator {
          </font>
         </property>
         <property name="text">
-         <string>Params</string>
+         <string>Params:</string>
         </property>
        </widget>
        <widget class="QPushButton" name="btnXssHelp">
         <property name="geometry">
          <rect>
-          <x>590</x>
-          <y>370</y>
-          <width>181</width>
+          <x>5</x>
+          <y>420</y>
+          <width>135</width>
           <height>31</height>
          </rect>
         </property>
@@ -554,9 +555,9 @@ QToolBar::separator {
        <widget class="QComboBox" name="payload_combox">
         <property name="geometry">
          <rect>
-          <x>790</x>
+          <x>380</x>
           <y>30</y>
-          <width>341</width>
+          <width>141</width>
           <height>27</height>
          </rect>
         </property>
@@ -589,20 +590,20 @@ QToolBar::separator {
        <widget class="QListWidget" name="Payload_listWidget">
         <property name="geometry">
          <rect>
-          <x>790</x>
-          <y>140</y>
-          <width>481</width>
-          <height>501</height>
+          <x>720</x>
+          <y>90</y>
+          <width>311</width>
+          <height>511</height>
          </rect>
         </property>
        </widget>
        <widget class="QLabel" name="payload_lbl">
         <property name="geometry">
          <rect>
-          <x>790</x>
+          <x>380</x>
           <y>0</y>
-          <width>341</width>
-          <height>21</height>
+          <width>151</width>
+          <height>31</height>
          </rect>
         </property>
         <property name="font">
@@ -612,15 +613,15 @@ QToolBar::separator {
          </font>
         </property>
         <property name="text">
-         <string>XSS Payloads by Context</string>
+         <string>XSS by content</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="payload_search">
         <property name="geometry">
          <rect>
-          <x>790</x>
-          <y>100</y>
-          <width>341</width>
+          <x>722</x>
+          <y>30</y>
+          <width>311</width>
           <height>27</height>
          </rect>
         </property>
@@ -628,10 +629,10 @@ QToolBar::separator {
        <widget class="QLabel" name="lbl_search">
         <property name="geometry">
          <rect>
-          <x>790</x>
-          <y>68</y>
-          <width>341</width>
-          <height>21</height>
+          <x>720</x>
+          <y>0</y>
+          <width>151</width>
+          <height>31</height>
          </rect>
         </property>
         <property name="font">
@@ -641,17 +642,22 @@ QToolBar::separator {
          </font>
         </property>
         <property name="text">
-         <string>Search Payloads</string>
+         <string>Search payload</string>
         </property>
        </widget>
        <widget class="QPushButton" name="filter_btn">
         <property name="geometry">
          <rect>
-          <x>1140</x>
-          <y>100</y>
-          <width>131</width>
+          <x>940</x>
+          <y>0</y>
+          <width>91</width>
           <height>27</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <bold>true</bold>
+         </font>
         </property>
         <property name="text">
          <string>Clear Filter</string>
@@ -660,9 +666,9 @@ QToolBar::separator {
        <widget class="QPushButton" name="params_btn">
         <property name="geometry">
          <rect>
-          <x>590</x>
-          <y>410</y>
-          <width>181</width>
+          <x>5</x>
+          <y>460</y>
+          <width>135</width>
           <height>31</height>
          </rect>
         </property>
@@ -673,6 +679,66 @@ QToolBar::separator {
         </property>
         <property name="text">
          <string>Params cheatsheet</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_response">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>60</y>
+          <width>291</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Server response to XSS Payload</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_list_payload">
+        <property name="geometry">
+         <rect>
+          <x>720</x>
+          <y>50</y>
+          <width>301</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Payload list from Context/Export</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="history_btn">
+        <property name="geometry">
+         <rect>
+          <x>1040</x>
+          <y>90</y>
+          <width>41</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../icon/history.jpg</normaloff>../icon/history.jpg</iconset>
         </property>
        </widget>
       </widget>
@@ -969,7 +1035,7 @@ QToolBar::separator {
     <property name="geometry">
      <rect>
       <x>1330</x>
-      <y>30</y>
+      <y>33</y>
       <width>64</width>
       <height>23</height>
      </rect>
@@ -1019,7 +1085,7 @@ QToolBar::separator {
     <property name="geometry">
      <rect>
       <x>1400</x>
-      <y>30</y>
+      <y>33</y>
       <width>81</width>
       <height>21</height>
      </rect>

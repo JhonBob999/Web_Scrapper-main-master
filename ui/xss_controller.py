@@ -1,11 +1,13 @@
 from PyQt5.QtWidgets import QMessageBox, QListWidgetItem
 from core.xss_payload_manager import load_xss_payloads
 from dialogs.params_cheatsheet_dialog import ParamsCheatsheetDialog
+from dialogs.payload_history_dialog import PayloadHistoryDialog
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import webbrowser, urllib.parse
+import json, os
 
 class XssController:
     def __init__(self, ui, parent_widget=None):
@@ -22,6 +24,7 @@ class XssController:
         self.ui.payload_search.textChanged.connect(self.filter_payloads)
         self.ui.filter_btn.clicked.connect(self.clear_payload_filter)
         self.ui.params_btn.clicked.connect(self._open_params_cheatsheet)
+        self.ui.history_btn.clicked.connect(self._open_history)
 
 
     def run_xss_exploit(self):
@@ -35,8 +38,7 @@ class XssController:
             return
 
         param_name = self.ui.lineEditParamName.text().strip() or "q"
-        full_url = f"http://{target}?{param_name}={urllib.parse.quote(payload)}"
-
+        full_url = f"http://{target}?{param_name}={payload_encoded}"
 
         try:
             chrome_options = Options()
@@ -45,17 +47,23 @@ class XssController:
                 chrome_options.add_argument("--disable-gpu")
                 chrome_options.add_argument("--window-size=1280,720")
 
-            # ✅ Вот здесь подключаем ChromeDriver через webdriver-manager
+            # ✅ Подключаем ChromeDriver
             driver = webdriver.Chrome(
                 service=Service(ChromeDriverManager().install()),
                 options=chrome_options
             )
 
             driver.get(full_url)
-            self.ui.textEdit.append(f"[XSS] Loaded in browser: {full_url}")
+            self.ui.response_textEdit.append(f"[XSS] Loaded in browser: {full_url}")
+
+            # — Добавляем payload в историю —
+            self._add_to_history(payload)
 
         except Exception as e:
-            self.ui.textEdit.append(f"[ERROR] {str(e)}")
+            self.ui.response_textEdit.append(f"[ERROR] {str(e)}")
+        finally:
+            driver.quit()
+
 
     def load_payloads(self, context):
         payloads = load_xss_payloads(context)
@@ -92,6 +100,39 @@ class XssController:
         parent_widget = self.ui.lineEditXssTarget.window()
         dialog = ParamsCheatsheetDialog(parent_widget)
         dialog.exec_()
+        
+    def _open_history(self):
+        # parent берём из реального виджета, например:
+        parent_widget = self.ui.lineEditXssTarget.window()
+        dlg = PayloadHistoryDialog(parent_widget)
+        dlg.exec_()
+        
+    def _history_path(self):
+        # путь до payload_history.json
+        return os.path.join(
+            os.path.dirname(__file__), "..", "data", "payload_history.json"
+        )
+
+    def _load_history(self):
+        try:
+            with open(self._history_path(), "r", encoding="utf-8") as f:
+                return json.load(f).get("history", [])
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+
+    def _save_history(self, history):
+        # храним только последние 10
+        data = {"history": history[:10]}
+        with open(self._history_path(), "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+    def _add_to_history(self, payload):
+        hist = self._load_history()
+        if payload in hist:
+            hist.remove(payload)
+        hist.insert(0, payload)
+        self._save_history(hist)
+
 
 
 
