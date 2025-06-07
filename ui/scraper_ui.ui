@@ -899,7 +899,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>80</y>
+          <y>60</y>
           <width>241</width>
           <height>25</height>
          </rect>
@@ -909,7 +909,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>110</y>
+          <y>90</y>
           <width>531</width>
           <height>681</height>
          </rect>
@@ -924,7 +924,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>50</y>
+          <y>30</y>
           <width>161</width>
           <height>31</height>
          </rect>
@@ -943,7 +943,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>340</x>
-          <y>110</y>
+          <y>90</y>
           <width>191</width>
           <height>31</height>
          </rect>
@@ -962,7 +962,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>1120</x>
-          <y>75</y>
+          <y>55</y>
           <width>261</width>
           <height>25</height>
          </rect>
@@ -972,7 +972,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>1120</x>
-          <y>40</y>
+          <y>20</y>
           <width>251</width>
           <height>31</height>
          </rect>
@@ -991,7 +991,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>1120</x>
-          <y>110</y>
+          <y>90</y>
           <width>531</width>
           <height>681</height>
          </rect>
@@ -1006,7 +1006,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>1550</x>
-          <y>110</y>
+          <y>90</y>
           <width>111</width>
           <height>31</height>
          </rect>
@@ -1025,17 +1025,20 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>550</x>
-          <y>110</y>
+          <y>90</y>
           <width>561</width>
           <height>541</height>
          </rect>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
        <widget class="QLabel" name="lbl_Payload">
         <property name="geometry">
          <rect>
           <x>550</x>
-          <y>50</y>
+          <y>30</y>
           <width>551</width>
           <height>51</height>
          </rect>
@@ -1048,8 +1051,8 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>550</x>
-          <y>650</y>
-          <width>111</width>
+          <y>630</y>
+          <width>121</width>
           <height>31</height>
          </rect>
         </property>
@@ -1057,17 +1060,17 @@ QToolBar::separator {
          <string>Run Payload</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="btn_test_domain">
+       <widget class="QPushButton" name="btn_testsandbox">
         <property name="geometry">
          <rect>
-          <x>670</x>
-          <y>650</y>
-          <width>111</width>
+          <x>690</x>
+          <y>630</y>
+          <width>121</width>
           <height>31</height>
          </rect>
         </property>
         <property name="text">
-         <string>Test on domain</string>
+         <string>Test on SandBox</string>
         </property>
        </widget>
       </widget>

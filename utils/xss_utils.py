@@ -2,9 +2,42 @@ import os
 import json
 import time
 import urllib.parse
+from urllib.parse import quote
 import requests
+import webbrowser
 from typing import List, Tuple
 from PyQt5.QtWidgets import QListWidget, QTextEdit
+
+
+def open_test_page(payload: str, use_localhost: bool = True):
+    encoded = quote(payload)
+    if use_localhost:
+        test_url = f"http://localhost:8080/test3.html?payload={encoded}"
+    else:
+        import os
+        path = os.path.abspath("assets/test_pages/test3.html")
+        test_url = f"file:///{path}?payload={encoded}"
+
+    webbrowser.open(test_url)
+
+def send_request_to_url(payload: str, target: str, param: str = "q") -> dict:
+    encoded = urllib.parse.quote(payload)
+    url = f"http://{target}?{param}={encoded}"
+    try:
+        r = requests.get(url, timeout=5)
+        return {
+            "url": url,
+            "status": r.status_code,
+            "elapsed": r.elapsed.total_seconds(),
+            "error": None
+        }
+    except Exception as e:
+        return {
+            "url": url,
+            "status": "ERROR",
+            "elapsed": 0,
+            "error": str(e)
+        }
 
 
 def build_test_url(payload: str, target: str, param: str = "q") -> str:

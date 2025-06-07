@@ -33,7 +33,9 @@ from utils.xss_utils import (
     get_listwidget_payloads,
     log_response,
     test_payload,
-    add_to_payload_history
+    add_to_payload_history,
+    open_test_page,
+    send_request_to_url
 )
 
 
@@ -66,6 +68,8 @@ class XssController:
         self.ui.params_btn.clicked.connect(self._open_params_cheatsheet)
         self.ui.history_btn.clicked.connect(self._open_history)
         self.ui.runAllBtn.clicked.connect(self._run_all_payloads)
+        self.ui.btn_testsandbox.clicked.connect(self.on_btn_testsandbox_clicked)
+        self.ui.btn_run_payload.clicked.connect(self.on_btn_run_payload_clicked)
         #Testing JS Files
         self.ui.domain_combox.currentTextChanged.connect(self.on_domain_selected)
         self.load_available_domains()
@@ -304,6 +308,38 @@ class XssController:
         # Показываем прогресс до старта потока
         self._show_progress(total)
         self.run_thread.start()
+        
+        
+    def on_btn_testsandbox_clicked(self):
+        payload = self.ui.payload_line.text().strip()
+        if not payload:
+            return
+        open_test_page(payload, use_localhost=True)
+        
+        
+    def on_btn_run_payload_clicked(self):
+        payload = self.ui.payload_line.text().strip()
+        target = self.ui.domain_combox.currentText().strip()
+        param = self.ui.payload_line.text().strip() or "q"
+
+        if not target or not payload:
+            QMessageBox.warning(self, "Input Error", "Please provide both payload and target.")
+            return
+
+        result = send_request_to_url(payload, target, param)
+        
+        log = (
+            f"URL: {result['url']}\n"
+            f"Status: {result['status']}\n"
+            f"Time: {result['elapsed']}s\n"
+        )
+        if result["error"]:
+            log += f"Error: {result['error']}\n"
+
+        # ⬇️ выводим лог в payload_TextEdit
+        self.ui.payload_TextEdit.appendPlainText(log)
+
+
         
 
         
