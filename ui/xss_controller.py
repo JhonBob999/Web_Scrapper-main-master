@@ -34,13 +34,13 @@ class XssController:
 
         # по умолчанию загружаем html_body-пейлоады
         self.ui.payload_combox.setCurrentText("html_body")
-        self.load_payloads("html_body")
+        self.set_payload_context(self.ui.payload_combox.currentText())
 
 
     def setup_connections(self):
         # Основные привязки сигналов → слотов
         self.ui.btnRunXss.clicked.connect(self.run_xss_exploit)
-        self.ui.payload_combox.currentTextChanged.connect(self.load_payloads)
+        self.ui.payload_combox.currentTextChanged.connect(self.set_payload_context)
         self.ui.Payload_listWidget.itemClicked.connect(self.insert_payload_to_field)
         self.ui.payload_search.textChanged.connect(self.filter_payloads)
         self.ui.filter_btn.clicked.connect(self.clear_payload_filter)
@@ -125,27 +125,59 @@ class XssController:
             self.ui.response_textEdit.append(f"[ERROR] {str(e)}")
         finally:
             driver.quit()
+            
+            
+########### SYNCHRONIZING TESTING ONE PAYLOAD FROM REQUEST ################
+########### SYNCHRONIZING TESTING ONE PAYLOAD FROM REQUEST ################
+        
+    def _test_payload(self, payload: str):
+        """
+        Синхронное тестирование одного payload-а через requests.
+        Возвращает (success: bool, status: int, elapsed_ms: float).
+        """
+        target = self.ui.lineEditXssTarget.text().strip()
+        if not target:
+            return False, None, 0.0
+
+        # именно URL уже строим через _build_test_url
+        url = self._build_test_url(payload)
+
+        start = time.time()
+        try:
+            resp = requests.get(url, timeout=10)
+            elapsed = (time.time() - start) * 1000
+            success = (resp.status_code == 200 and payload in resp.text)
+            return success, resp.status_code, elapsed
+        except Exception:
+            return False, None, (time.time() - start) * 1000
+        
+########### ALL PAYLOADS RUNING BLOCK ################
+########### ALL PAYLOADS RUNING BLOCK ################
+
+    def set_payload_context(self, context: str):
+        """
+        Public API: сменить контекст XSS, загрузить все payload-ы из core.xss_payload_manager
+        и обновить отображение.
+        """
+        self.current_context = context
+        self.current_payloads = load_xss_payloads(context)
+        self._refresh_payload_list()
 
 
-    def load_payloads(self, context: str):
+    def _refresh_payload_list(self, payloads: list[dict] = None):
         """
-        Загружает из core.xss_payload_manager список payload-ов для выбранного контекста
-        и сохраняет их для фильтрации/отображения.
+        Приватный метод: перерисовывает QListWidget.
+        Если payloads не переданы, берёт self.current_payloads.
         """
-        payloads = load_xss_payloads(context)
-        self.current_payloads = payloads
-        self.display_payloads(payloads)
+        if payloads is None:
+            payloads = getattr(self, 'current_payloads', [])
 
-
-    def display_payloads(self, payloads: list[dict]):
-        """
-        Отображает список словарей {'payload':..., 'desc':...} в QListWidget.
-        """
-        self.ui.Payload_listWidget.clear()
-        for item in payloads:
-            list_item = QListWidgetItem(item['payload'])
-            list_item.setToolTip(item['desc'])
-            self.ui.Payload_listWidget.addItem(list_item)
+        lw = self.ui.Payload_listWidget
+        lw.clear()
+        for entry in payloads:
+            item = QListWidgetItem(entry['payload'])
+            item.setToolTip(entry.get('desc', ''))
+            lw.addItem(item)
 
 
     def insert_payload_to_field(self, item: QListWidgetItem):
@@ -158,23 +190,26 @@ class XssController:
 
     def filter_payloads(self):
         """
-        Фильтрация списка payload-ов по введённой строке в payload_search.
+        Слот для текстового фильтра: отбирает записи из self.current_payloads
+        и перерисовывает список.
         """
-        query = self.ui.payload_search.text().lower()
+        q = self.ui.payload_search.text().lower()
         filtered = [
             item for item in getattr(self, 'current_payloads', [])
-            if query in item['payload'].lower() or query in item['desc'].lower()
+            if q in item['payload'].lower() or q in item.get('desc', '').lower()
         ]
-        self.display_payloads(filtered)
+        self._refresh_payload_list(filtered)
 
 
     def clear_payload_filter(self):
         """
-        Сбрасывает фильтр и показывает все payload-ы для текущего контекста.
+        Сброс фильтра: сразу показываем все payload-ы.
         """
         self.ui.payload_search.clear()
-        self.display_payloads(getattr(self, 'current_payloads', []))
+        self._refresh_payload_list()
 
+########### ALL PAYLOADS MAIN METHOD ################
+########### ALL PAYLOADS MAIN METHOD ################
 
     def _run_all_payloads(self):
         """
@@ -210,7 +245,11 @@ class XssController:
         # Показываем прогресс до старта потока
         self._show_progress(total)
         self.run_thread.start()
+        
 
+        
+########### THREADS FROM XSS_RUNALL_THREAD ################
+########### THREADS FROM XSS_RUNALL_THREAD ################
 
     def _on_thread_log(self, idx, total, payload, url, status, elapsed, success):
         """
@@ -233,28 +272,6 @@ class XssController:
         self._hide_progress()
         self.last_run_results = results
         self._show_run_summary(results)
-
-
-    def _test_payload(self, payload: str):
-        """
-        Синхронное тестирование одного payload-а через requests.
-        Возвращает (success: bool, status: int, elapsed_ms: float).
-        """
-        target = self.ui.lineEditXssTarget.text().strip()
-        if not target:
-            return False, None, 0.0
-
-        # именно URL уже строим через _build_test_url
-        url = self._build_test_url(payload)
-
-        start = time.time()
-        try:
-            resp = requests.get(url, timeout=10)
-            elapsed = (time.time() - start) * 1000
-            success = (resp.status_code == 200 and payload in resp.text)
-            return success, resp.status_code, elapsed
-        except Exception:
-            return False, None, (time.time() - start) * 1000
 
 ########### SUCCESSFULL TRIES ################
 ########### SUCCESSFULL TRIES ################
