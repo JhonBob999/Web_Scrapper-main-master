@@ -27,6 +27,8 @@ from ui.scanner_ui.dns_scanner import DnsScanner
 from ui.scanner_ui.certificate_scanner import CertificateScanner
 from ui.exploit_controller import ExploitController
 from ui.xss_controller import XssController
+#Bot ui
+from ui.bot_panel.bot_panel import BotPanelController
 # Utils import
 from utils.context_menu import show_context_menu
 # Dialog import
@@ -50,26 +52,12 @@ class ScraperApp(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        
-        #CVE TEST COMMENT
-        
-        """from core.exploit_loader import load_all_exploits, import_exploit_function
-
-        exploits = load_all_exploits()
-        print("Loaded exploits:")
-        for e in exploits:
-            print(f"- {e['id']}: {e['name']}")
-            check_func = import_exploit_function(e["folder"], "check_vulnerability.py", "check_vulnerability")
-            run_func = import_exploit_function(e["folder"], "run_exploit.py", "run_exploit")
-            if check_func:
-                result = check_func("127.0.0.1")
-                print(f"  [Check] Vulnerable: {result}")
-            if run_func and result:
-                out = run_func("127.0.0.1")
-                print(f"  [Exploit] Result: {out}")"""
 
         # Calendar Widget
         self.ui.action_open_calendar.triggered.connect(self.open_calendar_dialog)
+
+        #Bot panel
+        self.bot_panel_controller = BotPanelController(self.ui)
 
         # Column settings
         self.load_column_widths()
