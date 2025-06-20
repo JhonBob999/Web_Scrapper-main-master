@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+# Установка зависимостей
+RUN apt-get update && apt-get install -y \
+    chromium-driver chromium wget curl xvfb \
+    && pip install flask selenium
+
+# Создаём рабочую директорию
+WORKDIR /app
+
+# Копируем скрипт бота
+COPY entrypoint.py .
+
+# Устанавливаем точку входа
+ENTRYPOINT ["python", "entrypoint.py"]

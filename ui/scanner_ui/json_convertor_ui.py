@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\json_convertor.ui'
+# Form implementation generated from reading ui file 'c:\Users\rusla\Desktop\Web_Scrapper-main-master\ui\scanner_ui\json_convertor.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.11
 #
@@ -14,12 +14,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_JsonConvertor(object):
     def setupUi(self, JsonConvertor):
         JsonConvertor.setObjectName("JsonConvertor")
-        JsonConvertor.resize(1269, 782)
+        JsonConvertor.resize(1274, 782)
         font = QtGui.QFont()
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(10)
         font.setBold(True)
-        font.setWeight(75)
         JsonConvertor.setFont(font)
         self.centralwidget = QtWidgets.QWidget(JsonConvertor)
         self.centralwidget.setObjectName("centralwidget")
@@ -30,7 +29,6 @@ class Ui_JsonConvertor(object):
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(18)
         font.setBold(True)
-        font.setWeight(75)
         self.label_File_Name.setFont(font)
         self.label_File_Name.setObjectName("label_File_Name")
         self.verticalLayout.addWidget(self.label_File_Name)
@@ -50,7 +48,6 @@ class Ui_JsonConvertor(object):
         font.setFamily("Nimbus Mono PS [urw]")
         font.setPointSize(13)
         font.setBold(True)
-        font.setWeight(75)
         self.treeWidgetLoadJson.setFont(font)
         self.treeWidgetLoadJson.setStyleSheet("QTreeWidget {\n"
 "    font-family: \"Nimbus Mono PS [urw]\";\n"
@@ -68,9 +65,9 @@ class Ui_JsonConvertor(object):
 "    color: white; /* Белый текст для выделенного элемента */\n"
 "}\n"
 "")
-        self.treeWidgetLoadJson.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        self.treeWidgetLoadJson.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        self.treeWidgetLoadJson.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContentsOnFirstShow)
+        self.treeWidgetLoadJson.setVerticalScrollBarPolicy(QtCore.Qt.Qt::ScrollBarPolicy::ScrollBarAlwaysOn)
+        self.treeWidgetLoadJson.setHorizontalScrollBarPolicy(QtCore.Qt.Qt::ScrollBarPolicy::ScrollBarAlwaysOn)
+        self.treeWidgetLoadJson.setSizeAdjustPolicy(QtCore.Qt.QAbstractScrollArea::SizeAdjustPolicy::AdjustToContentsOnFirstShow)
         self.treeWidgetLoadJson.setObjectName("treeWidgetLoadJson")
         self.horizontalLayout.addWidget(self.treeWidgetLoadJson)
         self.tabWidget.addTab(self.tab, "")
@@ -80,7 +77,7 @@ class Ui_JsonConvertor(object):
         self.verticalLayout.addWidget(self.tabWidget)
         JsonConvertor.setCentralWidget(self.centralwidget)
         self.menuBar = QtWidgets.QMenuBar(JsonConvertor)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1269, 25))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1274, 22))
         self.menuBar.setObjectName("menuBar")
         self.menuFiles = QtWidgets.QMenu(self.menuBar)
         self.menuFiles.setObjectName("menuFiles")
