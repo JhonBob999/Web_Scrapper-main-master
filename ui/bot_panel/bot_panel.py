@@ -13,7 +13,7 @@ class BotPanelController:
         print("[DEBUG] Start Bot button clicked.")
         bot_type = "xss-bot"  # пока что вручную, потом из GUI
         config = {
-            "target": "http://localhost:8000/test3.html",
+            "target": "http://localhost:8080/test3.html",
             "param": "q",
             "headless": True
         }

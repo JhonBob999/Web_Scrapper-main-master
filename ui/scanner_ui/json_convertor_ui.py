@@ -65,9 +65,9 @@ class Ui_JsonConvertor(object):
 "    color: white; /* Белый текст для выделенного элемента */\n"
 "}\n"
 "")
-        self.treeWidgetLoadJson.setVerticalScrollBarPolicy(QtCore.Qt.Qt::ScrollBarPolicy::ScrollBarAlwaysOn)
-        self.treeWidgetLoadJson.setHorizontalScrollBarPolicy(QtCore.Qt.Qt::ScrollBarPolicy::ScrollBarAlwaysOn)
-        self.treeWidgetLoadJson.setSizeAdjustPolicy(QtCore.Qt.QAbstractScrollArea::SizeAdjustPolicy::AdjustToContentsOnFirstShow)
+        self.treeWidgetLoadJson.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.treeWidgetLoadJson.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.treeWidgetLoadJson.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContentsOnFirstShow)
         self.treeWidgetLoadJson.setObjectName("treeWidgetLoadJson")
         self.horizontalLayout.addWidget(self.treeWidgetLoadJson)
         self.tabWidget.addTab(self.tab, "")
