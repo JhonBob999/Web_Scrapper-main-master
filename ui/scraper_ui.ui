@@ -1325,18 +1325,35 @@ QToolBar::separator {
        <string>Delete</string>
       </property>
      </widget>
-     <widget class="QTreeWidget" name="treeWidget">
+     <widget class="QTreeWidget" name="bot_Widget">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>10</y>
         <width>531</width>
-        <height>431</height>
+        <height>641</height>
        </rect>
       </property>
       <column>
        <property name="text">
-        <string notr="true">1</string>
+        <string>Bot</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Status</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <bold>true</bold>
+        </font>
        </property>
       </column>
      </widget>
