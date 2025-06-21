@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1680</width>
-    <height>900</height>
+    <width>1489</width>
+    <height>962</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -144,7 +144,7 @@ QToolBar::separator {
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>1681</width>
+      <width>1489</width>
       <height>1001</height>
      </rect>
     </property>
@@ -1249,51 +1249,13 @@ QToolBar::separator {
      <attribute name="title">
       <string>Bots Panel</string>
      </attribute>
-     <widget class="QPushButton" name="btn_startBot">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>480</y>
-        <width>181</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Create Empty Bot</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btn_stopBot">
-      <property name="geometry">
-       <rect>
-        <x>590</x>
-        <y>480</y>
-        <width>181</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Stop</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="btn_configureBot">
       <property name="geometry">
        <rect>
-        <x>190</x>
-        <y>480</y>
-        <width>181</width>
-        <height>31</height>
+        <x>0</x>
+        <y>10</y>
+        <width>121</width>
+        <height>33</height>
        </rect>
       </property>
       <property name="font">
@@ -1306,130 +1268,13 @@ QToolBar::separator {
        <string>Configure</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_deleteBot">
-      <property name="geometry">
-       <rect>
-        <x>590</x>
-        <y>515</y>
-        <width>181</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Delete</string>
-      </property>
-     </widget>
-     <widget class="QTreeWidget" name="bot_Widget">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>10</y>
-        <width>1671</width>
-        <height>471</height>
-       </rect>
-      </property>
-      <column>
-       <property name="text">
-        <string>Bot Type</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Bot ID</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Bot Name</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Status</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Domain</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Profile</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Created</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Comment</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-      </column>
-     </widget>
      <widget class="QPushButton" name="btn_loadBot">
       <property name="geometry">
        <rect>
-        <x>390</x>
-        <y>480</y>
-        <width>181</width>
-        <height>31</height>
+        <x>280</x>
+        <y>10</y>
+        <width>121</width>
+        <height>33</height>
        </rect>
       </property>
       <property name="font">
@@ -1445,10 +1290,10 @@ QToolBar::separator {
      <widget class="QPushButton" name="btn_applyConfig">
       <property name="geometry">
        <rect>
-        <x>190</x>
-        <y>515</y>
-        <width>181</width>
-        <height>31</height>
+        <x>130</x>
+        <y>10</y>
+        <width>141</width>
+        <height>33</height>
        </rect>
       </property>
       <property name="font">
@@ -1461,24 +1306,293 @@ QToolBar::separator {
        <string>Apply Config</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_launchBot">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>515</y>
-        <width>181</width>
-        <height>31</height>
+        <y>50</y>
+        <width>821</width>
+        <height>821</height>
        </rect>
       </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <bold>true</bold>
-       </font>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="4" column="0">
+        <widget class="QPushButton" name="btn_launchBot">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Launch Bot/Bots</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="2">
+        <widget class="QTreeWidget" name="bot_Widget">
+         <column>
+          <property name="text">
+           <string>Bot Type</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Bot ID</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Bot Name</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Status</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Domain</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Profile</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Created</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Comment</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="btn_startBot">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Create Empty Bot</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QPushButton" name="btn_deleteBot">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Delete</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QPushButton" name="btn_stopBot">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Stop</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="geometry">
+       <rect>
+        <x>820</x>
+        <y>30</y>
+        <width>661</width>
+        <height>841</height>
+       </rect>
       </property>
-      <property name="text">
-       <string>Launch Bot/Bots</string>
+      <property name="currentIndex">
+       <number>0</number>
       </property>
+      <widget class="QWidget" name="page">
+       <widget class="QPlainTextEdit" name="plainText_botLogs">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>20</y>
+          <width>651</width>
+          <height>731</height>
+         </rect>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QGroupBox" name="groupLogOptions">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>750</y>
+          <width>301</width>
+          <height>91</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Log Settings</string>
+        </property>
+        <widget class="QCheckBox" name="chkLogRequests">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>111</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Log Requests </string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chkLogResponses">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>50</y>
+           <width>111</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Log Responses </string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chkLogConsole">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>19</y>
+           <width>131</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>JS Console Output</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chkLogDockerEvents">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>49</y>
+           <width>131</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Docker Events</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QPushButton" name="btn_saveLogs">
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>760</y>
+          <width>111</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Save Logs</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="btn_loadLogs">
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>800</y>
+          <width>111</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Load Logs</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="page_2"/>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_6">

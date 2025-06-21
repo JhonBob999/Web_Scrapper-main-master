@@ -29,6 +29,10 @@ class BotPanelController:
         self.ui.bot_Widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.bot_Widget.customContextMenuRequested.connect(self._handle_context_menu)
         self.ui.bot_Widget.itemChanged.connect(self._handle_item_edited)
+        #PLAINTEXT LOGS BUTTONS
+        self.ui.btn_saveLogs.clicked.connect(self._on_save_log_options)
+        self.ui.btn_loadLogs.clicked.connect(self._on_load_log_options)
+
 
     def _handle_start_bot(self):
         print("[DEBUG] Start Bot button clicked.")
@@ -391,6 +395,58 @@ class BotPanelController:
 
         dialog = LogViewerDialog(bot_id, log_path, parent=self.parent)
         dialog.exec_()
+        
+    def load_log_options(self, bot_id: str):
+        config_path = f"data/bots/{bot_id}/config.json"
+        if not os.path.exists(config_path):
+            return
+
+        with open(config_path, "r") as f:
+            config = json.load(f)
+            log_opts = config.get("log_options", {})
+
+        self.ui.chkLogRequests.setChecked(log_opts.get("requests", True))
+        self.ui.chkLogResponses.setChecked(log_opts.get("responses", True))
+        self.ui.chkLogConsole.setChecked(log_opts.get("console", False))
+        self.ui.chkLogDockerEvents.setChecked(log_opts.get("docker", False))
+        
+    def save_log_options(self, bot_id: str):
+        config_path = f"data/bots/{bot_id}/config.json"
+        if not os.path.exists(config_path):
+            return
+
+        with open(config_path, "r") as f:
+            config = json.load(f)
+
+        config["log_options"] = {
+            "requests": self.ui.chkLogRequests.isChecked(),
+            "responses": self.ui.chkLogResponses.isChecked(),
+            "console": self.ui.chkLogConsole.isChecked(),
+            "docker": self.ui.chkLogDockerEvents.isChecked()
+        }
+
+        with open(config_path, "w") as f:
+            json.dump(config, f, indent=4)
+            
+    def _on_save_log_options(self):
+        bot_id = self.get_selected_bot_id()
+        if bot_id:
+            self.save_log_options(bot_id)
+
+    def _on_load_log_options(self):
+        bot_id = self.get_selected_bot_id()
+        if bot_id:
+            self.load_log_options(bot_id)
+            
+    def get_selected_bot_id(self):
+        item = self.ui.bot_Widget.currentItem()
+        if item:
+            return item.text(1)  # Колонка с Bot ID
+        return None
+
+
+
+
 
 
 
