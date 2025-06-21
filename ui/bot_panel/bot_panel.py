@@ -98,21 +98,39 @@ class BotPanelController:
 
         bot_id = selected_item.text(1)
         dialog = BotConfigDialog(bot_id=bot_id, parent=self.parent)
+
         if dialog.exec_() == QDialog.Accepted:
-            config = dialog.get_config()
-            if config:
-                with open(f"data/bots/{bot_id}/config.json", "w") as f:
-                    json.dump(config, f, indent=4)
+            # Загружаем config.json заново
+            config_path = os.path.join("data", "bots", bot_id, "config.json")
+            if os.path.exists(config_path):
+                try:
+                    with open(config_path, "r", encoding="utf-8") as f:
+                        config = json.load(f)
+
+                    domain = config.get("target", "")
+                    if domain:
+                        selected_item.setText(4, domain)
+
+                    profile = config.get("profile_name", "")
+                    if profile:
+                        selected_item.setText(5, profile)
+
+                except Exception as e:
+                    print(f"[ERROR] Failed to refresh UI after config: {e}")
+
                     
                     
     def on_btn_loadBot_clicked(self):
         dialog = LoadBotsDialog(parent=self.parent)
         if dialog.exec_() == QDialog.Accepted:
             bot_ids = dialog.get_selected_bots()
+
             for bot_id in bot_ids:
                 bot_type = bot_id.split("_")[0]
                 status_path = f"data/bots/{bot_id}/status.json"
                 config_path = f"data/bots/{bot_id}/config.json"
+
+                # Дефолты
                 status = "Ready"
                 alias = "Loaded Bot"
                 domain = ""
@@ -120,18 +138,26 @@ class BotPanelController:
                 created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 comment = ""
 
-                if os.path.exists(status_path):
-                    with open(status_path, "r") as f:
-                        status_data = json.load(f)
-                        status = status_data.get("status", "Ready")
-                        domain = status_data.get("target", "")
-                        comment = status_data.get("comment", "")
-                        created = status_data.get("created", created)
-
+                # Сначала читаем config.json (важнее!)
                 if os.path.exists(config_path):
-                    with open(config_path, "r") as f:
-                        config_data = json.load(f)
-                        profile = config_data.get("profile_name", "default")
+                    try:
+                        with open(config_path, "r", encoding="utf-8") as f:
+                            config_data = json.load(f)
+                            domain = config_data.get("target", "")
+                            profile = config_data.get("profile_name", "default")
+                    except Exception as e:
+                        print(f"[ERROR] Failed to read config: {e}")
+
+                # Потом статус
+                if os.path.exists(status_path):
+                    try:
+                        with open(status_path, "r", encoding="utf-8") as f:
+                            status_data = json.load(f)
+                            status = status_data.get("status", "Ready")
+                            comment = status_data.get("comment", "")
+                            created = status_data.get("created", created)
+                    except Exception as e:
+                        print(f"[ERROR] Failed to read status: {e}")
 
                 item = QTreeWidgetItem([
                     bot_type, bot_id, alias, status, domain, profile, created, comment
@@ -158,11 +184,24 @@ class BotPanelController:
             for item in self.ui.bot_Widget.selectedItems():
                 bot_id = item.text(1)
                 config_path = os.path.join("data", "bots", bot_id, "config.json")
+
                 try:
-                    with open(config_path, "w") as f:
+                    with open(config_path, "w", encoding="utf-8") as f:
                         json.dump(config, f, indent=4)
                 except Exception as e:
                     QMessageBox.warning(self.parent, "Error", f"Failed to apply config to {bot_id}:\n{str(e)}")
+                    continue
+
+                # 🔄 Обновляем колонку 4 (Domain)
+                domain = config.get("target", "")
+                if domain:
+                    item.setText(4, domain)
+
+                # 🔄 Обновляем колонку 5 (Profile), если есть
+                profile_name = config.get("profile_name", "")
+                if profile_name:
+                    item.setText(5, profile_name)
+
                     
     def _handle_context_menu(self, position):
         callbacks = {
@@ -204,7 +243,27 @@ class BotPanelController:
     def configure_bot(self, item):
         bot_id = item.text(1)
         dialog = BotConfigDialog(bot_id=bot_id, parent=self.parent)
-        dialog.exec_()
+
+        if dialog.exec_() == QDialog.Accepted:
+            config_path = os.path.join("data", "bots", bot_id, "config.json")
+            if os.path.exists(config_path):
+                try:
+                    with open(config_path, "r", encoding="utf-8") as f:
+                        config = json.load(f)
+
+                    # 🔄 Обновляем колонку 4 (Domain)
+                    domain = config.get("target", "")
+                    if domain:
+                        item.setText(4, domain)
+
+                    # 🔄 Обновляем колонку 5 (Profile)
+                    profile = config.get("profile_name", "")
+                    if profile:
+                        item.setText(5, profile)
+
+                except Exception as e:
+                    print(f"[ERROR] Failed to load updated config: {e}")
+
 
     def save_bot_profile(self, item):
         bot_id = item.text(1)

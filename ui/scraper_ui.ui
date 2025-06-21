@@ -1391,7 +1391,7 @@ QToolBar::separator {
       </column>
       <column>
        <property name="text">
-        <string>Created</string>
+        <string>Profile</string>
        </property>
        <property name="font">
         <font>
@@ -1402,7 +1402,7 @@ QToolBar::separator {
       </column>
       <column>
        <property name="text">
-        <string>Profile</string>
+        <string>Created</string>
        </property>
        <property name="font">
         <font>

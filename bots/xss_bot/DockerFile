@@ -1,15 +1,16 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
-# Установка зависимостей
 RUN apt-get update && apt-get install -y \
-    chromium-driver chromium wget curl xvfb \
-    && pip install flask selenium
+    chromium-driver chromium wget curl unzip gnupg \
+    && rm -rf /var/lib/apt/lists/*
 
-# Создаём рабочую директорию
+# ВАЖНО: ставим старую версию blinker
+RUN pip install --no-cache-dir selenium selenium-wire blinker==1.4
+
+ENV CHROME_BIN=/usr/bin/chromium
+ENV CHROMEDRIVER=/usr/bin/chromedriver
+
 WORKDIR /app
-
-# Копируем скрипт бота
 COPY entrypoint.py .
 
-# Устанавливаем точку входа
-ENTRYPOINT ["python", "entrypoint.py"]
+CMD ["python", "entrypoint.py"]

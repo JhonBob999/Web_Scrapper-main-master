@@ -115,4 +115,21 @@ class BotConfigDialog(QDialog):
             QMessageBox.information(self, "Success", f"Profile saved to:\n{file_path}")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to save profile:\n{str(e)}")
+            
+    def accept(self):
+        config = self.get_config()
+        if config is None:
+            return  # Ошибка уже показана пользователю
+
+        if self.bot_id:
+            config_path = os.path.join("data", "bots", self.bot_id, "config.json")
+            try:
+                with open(config_path, "w", encoding="utf-8") as f:
+                    json.dump(config, f, indent=4)
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to save config:\n{str(e)}")
+                return
+
+        super().accept()
+
 

@@ -55,3 +55,4 @@ wsproto
 yarl
 pandas
 pyperclip
+selenium-wire
