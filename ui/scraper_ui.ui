@@ -1252,8 +1252,8 @@ QToolBar::separator {
      <widget class="QPushButton" name="btn_startBot">
       <property name="geometry">
        <rect>
-        <x>550</x>
-        <y>10</y>
+        <x>0</x>
+        <y>480</y>
         <width>181</width>
         <height>31</height>
        </rect>
@@ -1271,8 +1271,8 @@ QToolBar::separator {
      <widget class="QPushButton" name="btn_stopBot">
       <property name="geometry">
        <rect>
-        <x>550</x>
-        <y>90</y>
+        <x>590</x>
+        <y>480</y>
         <width>181</width>
         <height>31</height>
        </rect>
@@ -1290,8 +1290,8 @@ QToolBar::separator {
      <widget class="QPushButton" name="btn_configureBot">
       <property name="geometry">
        <rect>
-        <x>550</x>
-        <y>130</y>
+        <x>190</x>
+        <y>480</y>
         <width>181</width>
         <height>31</height>
        </rect>
@@ -1309,8 +1309,8 @@ QToolBar::separator {
      <widget class="QPushButton" name="btn_deleteBot">
       <property name="geometry">
        <rect>
-        <x>550</x>
-        <y>250</y>
+        <x>590</x>
+        <y>515</y>
         <width>181</width>
         <height>31</height>
        </rect>
@@ -1328,10 +1328,10 @@ QToolBar::separator {
      <widget class="QTreeWidget" name="bot_Widget">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>0</x>
         <y>10</y>
-        <width>531</width>
-        <height>641</height>
+        <width>1671</width>
+        <height>471</height>
        </rect>
       </property>
       <column>
@@ -1347,7 +1347,18 @@ QToolBar::separator {
       </column>
       <column>
        <property name="text">
-        <string>ID</string>
+        <string>Bot ID</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Bot Name</string>
        </property>
        <property name="font">
         <font>
@@ -1367,12 +1378,56 @@ QToolBar::separator {
         </font>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>Domain</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Created</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Profile</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Comment</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
      </widget>
      <widget class="QPushButton" name="btn_loadBot">
       <property name="geometry">
        <rect>
-        <x>550</x>
-        <y>170</y>
+        <x>390</x>
+        <y>480</y>
         <width>181</width>
         <height>31</height>
        </rect>
@@ -1390,8 +1445,8 @@ QToolBar::separator {
      <widget class="QPushButton" name="btn_applyConfig">
       <property name="geometry">
        <rect>
-        <x>550</x>
-        <y>210</y>
+        <x>190</x>
+        <y>515</y>
         <width>181</width>
         <height>31</height>
        </rect>
@@ -1409,8 +1464,8 @@ QToolBar::separator {
      <widget class="QPushButton" name="btn_launchBot">
       <property name="geometry">
        <rect>
-        <x>550</x>
-        <y>50</y>
+        <x>0</x>
+        <y>515</y>
         <width>181</width>
         <height>31</height>
        </rect>
