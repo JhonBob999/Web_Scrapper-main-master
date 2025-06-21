@@ -1,13 +1,15 @@
-from PyQt5.QtWidgets import QMessageBox, QTreeWidgetItem, QDialog, QFileDialog, QLineEdit
+from PyQt5.QtWidgets import QMessageBox, QTreeWidgetItem, QDialog, QFileDialog, QLineEdit, QInputDialog
 from PyQt5.QtCore import Qt
 from core.bot_core.bot_manager import BotManager
 from dialogs.bot_config_dialogs.bot_config_dialog import BotConfigDialog
 from dialogs.load_bots_dialog.load_bots_dialog import LoadBotsDialog
 from dialogs.apply_config_dialog.apply_config_dialog import ApplyConfigDialog
+from dialogs.log_viewer_dialog import LogViewerDialog
 from ui.bot_panel.bot_panelContextMenu import open_bot_context_menu
 from datetime import datetime
 import json
 import os
+import shutil
 
 class BotPanelController:
     def __init__(self, ui, parent=None):
@@ -169,6 +171,8 @@ class BotPanelController:
             "configure": self.configure_bot,
             "save_profile": self.save_bot_profile,
             "load_profile": self.load_bot_profile,
+            "rename": self.rename_bot,
+            "view_logs": self.open_log_viewer,
         }
         open_bot_context_menu(self.parent, self.ui.bot_Widget, position, callbacks)
         
@@ -290,6 +294,44 @@ class BotPanelController:
         created = item.text(6)
 
         self.save_bot_status(bot_id, status, domain, comment, created)
+        
+    def rename_bot(self, item: QTreeWidgetItem):
+        bot_id = item.text(1)
+        current_name = item.text(2)
+
+        new_name, ok = QInputDialog.getText(self.parent, "Rename Bot", "Enter new bot name:", text=current_name)
+        if not ok or not new_name.strip():
+            return
+
+        new_name = new_name.strip()
+        item.setText(2, new_name)
+
+        # Обновим status.json
+        status_path = f"data/bots/{bot_id}/status.json"
+        if os.path.exists(status_path):
+            try:
+                with open(status_path, "r", encoding="utf-8") as f:
+                    status_data = json.load(f)
+            except:
+                status_data = {}
+
+            status_data["alias"] = new_name
+            try:
+                with open(status_path, "w", encoding="utf-8") as f:
+                    json.dump(status_data, f, indent=4)
+            except Exception as e:
+                print(f"[ERROR] Cannot save new alias: {e}")
+                      
+    def open_log_viewer(self, item):
+        bot_id = item.text(1)
+        log_path = f"data/bots/{bot_id}/logs.txt"
+
+        if not os.path.exists(log_path):
+            QMessageBox.warning(self.parent, "No Logs", f"No logs found for bot: {bot_id}")
+            return
+
+        dialog = LogViewerDialog(bot_id, log_path, parent=self.parent)
+        dialog.exec_()
 
 
 
