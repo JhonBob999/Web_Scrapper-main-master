@@ -61,7 +61,7 @@ class BotPanelController:
             print(f"[GUI] Bot {bot_id} successfully launched.")
             
             alias = "New Bot"  # пока дефолт, потом сделаем окно
-            status = "Running"
+            status = "Ready"
             domain = config.get("target", "")
             profile = config.get("profile_name", "default")
             created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -147,7 +147,7 @@ class BotPanelController:
                 config_path = f"data/bots/{bot_id}/config.json"
 
                 # Дефолты
-                status = "Ready"
+                status = "Running"
                 alias = "Loaded Bot"
                 domain = ""
                 profile = "default"
