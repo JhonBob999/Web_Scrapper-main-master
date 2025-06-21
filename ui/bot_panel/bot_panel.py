@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMessageBox, QTreeWidgetItem, QDialog, QFileDialog, QLineEdit, QInputDialog
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from core.bot_core.bot_manager import BotManager
 from dialogs.bot_config_dialogs.bot_config_dialog import BotConfigDialog
 from dialogs.load_bots_dialog.load_bots_dialog import LoadBotsDialog
@@ -31,7 +31,19 @@ class BotPanelController:
         self.ui.bot_Widget.itemChanged.connect(self._handle_item_edited)
         #PLAINTEXT LOGS BUTTONS
         self.ui.btn_saveLogs.clicked.connect(self._on_save_log_options)
-        self.ui.btn_loadLogs.clicked.connect(self._on_load_log_options)
+        self.ui.btn_loadLogs.clicked.connect(self._load_log_interface)
+        # Таймер для логов
+        self.log_timer = QTimer()
+        self.log_timer.setInterval(2000)  # 2 секунды
+        self.log_timer.timeout.connect(self._update_bot_logs)
+        self.current_log_path = None  # путь до logs.txt для выбранного бота
+
+
+    def _load_log_interface(self):
+        bot_id = self.get_selected_bot_id()
+        if bot_id:
+            self.load_log_options(bot_id)
+            self._start_log_monitoring(bot_id)
 
 
     def _handle_start_bot(self):
@@ -89,7 +101,7 @@ class BotPanelController:
             QMessageBox.information(self.parent, "Success", f"Bot '{bot_id}' has been stopped.")
 
             # ✅ Обновляем статус во второй колонке
-            selected_item.setText(2, "Stopped")
+            selected_item.setText(3, "Stopped")
 
         except Exception as e:
             QMessageBox.critical(self.parent, "Error", f"Failed to stop bot '{bot_id}':\n{str(e)}")
@@ -242,7 +254,7 @@ class BotPanelController:
     def stop_bot(self, item):
         bot_id = item.text(1)
         self.bot_manager.stop_bot(bot_id)
-        item.setText(2, "Stopped")
+        item.setText(3, "Stopped")
         
     def configure_bot(self, item):
         bot_id = item.text(1)
@@ -327,7 +339,7 @@ class BotPanelController:
         self.bot_manager.start_existing_bot(bot_id, bot_type, config)
 
         # 💡 можешь optionally обновить статус
-        item.setText(2, "Running")
+        item.setText(3, "Running")
         
         
         
@@ -432,17 +444,36 @@ class BotPanelController:
         bot_id = self.get_selected_bot_id()
         if bot_id:
             self.save_log_options(bot_id)
-
-    def _on_load_log_options(self):
-        bot_id = self.get_selected_bot_id()
-        if bot_id:
-            self.load_log_options(bot_id)
             
     def get_selected_bot_id(self):
         item = self.ui.bot_Widget.currentItem()
         if item:
             return item.text(1)  # Колонка с Bot ID
         return None
+    
+    
+    def _update_bot_logs(self):
+        if not self.current_log_path or not os.path.exists(self.current_log_path):
+            return
+
+        try:
+            with open(self.current_log_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                self.ui.plainText_botLogs.setPlainText(content)
+        except Exception as e:
+            print(f"[LOG ERROR] Failed to read logs.txt: {e}")
+            
+    def _start_log_monitoring(self, bot_id: str):
+        self.current_log_path = f"data/bots/{bot_id}/logs.txt"
+        self.log_timer.start()
+        
+    def _stop_log_monitoring(self):
+        self.log_timer.stop()
+        self.current_log_path = None
+        self.ui.plainText_botLogs.clear()
+
+
+
 
 
 

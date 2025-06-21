@@ -34,19 +34,22 @@ class BotManager:
 
         bot_folder = os.path.join(self.bots_data_path, bot_id)
         print(f"[DEBUG] Creating folder: {bot_folder}")
-        os.makedirs(bot_folder, exist_ok=True)
+        os.makedirs(os.path.join(bot_folder, "extra_data"), exist_ok=True)
+        open(os.path.join(bot_folder, "logs.txt"), "a").close()
 
         config_path = os.path.join(bot_folder, "config.json")
         with open(config_path, "w") as f:
             json.dump(config, f, indent=4)
 
-        abs_volume_path = os.path.abspath(bot_folder)
+        abs_path = os.path.abspath(bot_folder)
         image_name = f"{bot_type}"
 
         docker_cmd = [
             "docker", "run", "-d",
             "--name", bot_id,
-            "-v", f"{abs_volume_path}:/app/shared",
+            "-v", f"{abs_path}/config.json:/app/config.json",
+            "-v", f"{abs_path}/logs.txt:/app/logs.txt",
+            "-v", f"{abs_path}/extra_data:/app/extra_data",
             image_name
         ]
 
@@ -73,13 +76,10 @@ class BotManager:
         """
         Останавливает запущенный Docker-контейнер по bot_id
         """
-        container_name = bot_id  # именно так, потому что контейнер создавался с именем bot_id
+        container_name = bot_id
         docker_utils.stop_container(container_name)
-        
-        
-    def start_existing_bot(self, bot_id: str, bot_type: str, config: dict) -> None:
-        import subprocess
 
+    def start_existing_bot(self, bot_id: str, bot_type: str, config: dict) -> None:
         print(f"[DEBUG] Starting existing bot: {bot_id}")
         bot_folder = os.path.join(self.bots_data_path, bot_id)
 
@@ -88,14 +88,19 @@ class BotManager:
             return
 
         config_path = os.path.join(bot_folder, "config.json")
+        logs_path = os.path.join(bot_folder, "logs.txt")
+        extra_path = os.path.join(bot_folder, "extra_data")
+
+        os.makedirs(extra_path, exist_ok=True)
+        open(logs_path, "a").close()
+
         if not os.path.exists(config_path):
             print(f"[ERROR] Config not found: {config_path}")
             return
 
-        abs_volume_path = os.path.abspath(bot_folder)
+        abs_path = os.path.abspath(bot_folder)
         image_name = bot_type
 
-        # ✅ Проверка: существует ли контейнер
         check_cmd = ["docker", "ps", "-a", "--filter", f"name=^{bot_id}$", "--format", "{{.Status}}"]
         result = subprocess.run(check_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
@@ -108,11 +113,12 @@ class BotManager:
                 print(f"[INFO] Removing old container for bot '{bot_id}' (status: {status})")
                 subprocess.run(["docker", "rm", bot_id], check=True)
 
-        # ✅ Запуск контейнера
         docker_cmd = [
             "docker", "run", "-d",
             "--name", bot_id,
-            "-v", f"{abs_volume_path}:/app/shared",
+            "-v", f"{abs_path}/config.json:/app/config.json",
+            "-v", f"{abs_path}/logs.txt:/app/logs.txt",
+            "-v", f"{abs_path}/extra_data:/app/extra_data",
             image_name
         ]
 
@@ -121,4 +127,3 @@ class BotManager:
             print(f"[INFO] Bot '{bot_id}' started using image '{image_name}'")
         except subprocess.CalledProcessError as e:
             print(f"[ERROR] Failed to start bot '{bot_id}': {e}")
-

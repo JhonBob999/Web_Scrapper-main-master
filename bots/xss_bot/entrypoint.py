@@ -1,56 +1,96 @@
-from seleniumwire import webdriver
-from selenium.webdriver.chrome.options import Options
-from urllib.parse import quote
+# entrypoint.py — Bot Informer (Logger)
+
 import json
-import time
 import os
+from datetime import datetime
+from seleniumwire import webdriver
+from selenium.webdriver.firefox.options import Options
 
-# Чтение конфига
-with open("shared/config.json", "r") as f:
-    config = json.load(f)
 
-target = config.get("target")
-param = config.get("param", "q")
-headless = config.get("headless", True)
-payloads = config.get("payloads", ["<script>alert(1)</script>", "<img src=x onerror=alert(1)>"])
 
-# Настройка браузера
-options = Options()
-if headless:
-    options.add_argument("--headless")
-options.add_argument("--disable-gpu")
-options.add_argument("--no-sandbox")
+def log(text, level="INFO"):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("logs.txt", "a", encoding="utf-8") as f:
+        f.write(f"[{timestamp}] [{level}] {text}\n")
 
-driver = webdriver.Chrome(options=options)
 
-# Лог файл
-log_path = "shared/logs.txt"
-with open(log_path, "w", encoding="utf-8") as log_file:
-    for payload in payloads:
-        encoded = quote(payload)
-        url = f"{target}?{param}={encoded}"
-        try:
-            driver.get(url)
-            time.sleep(1)
+def read_config():
+    with open("config.json", "r", encoding="utf-8") as f:
+        return json.load(f)
 
-            log_file.write(f"[→] GET {url}\n")
 
-            for request in driver.requests:
-                if request.response and target in request.url:
-                    log_file.write(f"[←] Status: {request.response.status_code}\n")
-                    log_file.write(f"     Headers: {dict(request.response.headers)}\n\n")
+def save_json(data, path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+def main():
+    config = read_config()
+    target = config.get("target")
+    headers = config.get("headers", {})
+    log_options = config.get("log_options", {})
+    browser = config.get("browser", "firefox").lower()
+    headless = config.get("headless", True)
+
+    log(f"Starting bot for: {target}")
+
+    # Select browser
+    driver = None
+    try:
+        if browser == "chrome":
+            from selenium.webdriver.chrome.options import Options as ChromeOptions
+            options = ChromeOptions()
+            if headless:
+                options.add_argument("--headless")
+            driver = webdriver.Chrome(options=options)
+        elif browser == "firefox":
+            from selenium.webdriver.firefox.options import Options as FirefoxOptions
+            options = FirefoxOptions()
+            if headless:
+                options.add_argument("--headless")
+            driver = webdriver.Firefox(options=options)
+        else:
+            raise ValueError(f"Unsupported browser: {browser}")
+
+        driver.header_overrides = headers
+        driver.get(target)
+        log(f"Visited {target}")
+
+        if log_options.get("requests", True):
+            for req in driver.requests:
+                if req.response:
+                    log(f"REQ: {req.method} {req.url}", "REQ")
+                    log(f"RESP: {req.response.status_code} {req.response.headers.get('Content-Type')}", "RESP")
+
+        js_files = [r.url for r in driver.requests if r.url.endswith(".js")]
+        if js_files:
+            save_json(js_files, "extra_data/js_list.json")
+            log(f"Found {len(js_files)} JS files", "INFO")
+
+        if log_options.get("console", False):
+            if browser == "chrome":
+                try:
+                    for entry in driver.get_log("browser"):
+                        log(f"[JS] {entry['level']} - {entry['message']}", "JS")
+                except Exception as e:
+                    log(f"Failed to get JS console logs: {e}", "ERROR")
+            else:
+                log("JS console logs not supported for Firefox", "WARN")
+
+        if log_options.get("responses", True):
+            for req in driver.requests:
+                if req.url == target and req.response:
+                    save_json(dict(req.response.headers), "extra_data/headers.json")
                     break
 
-        except Exception as e:
-            log_file.write(f"[ERROR] {url} — {str(e)}\n")
+    except Exception as e:
+        log(f"Exception occurred: {e}", "ERROR")
+    finally:
+        if driver:
+            driver.quit()
+        log("Bot finished.")
 
-driver.quit()
 
-# Запись финального статуса
-status = {
-    "status": "completed",
-    "target": target,
-    "success": True
-}
-with open("shared/status.json", "w") as f:
-    json.dump(status, f, indent=4)
+if __name__ == "__main__":
+    main()

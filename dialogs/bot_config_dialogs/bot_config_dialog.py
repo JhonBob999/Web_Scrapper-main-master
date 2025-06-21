@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QDialog, QLabel, QLineEdit, QCheckBox, QPlainTextEdit,
-    QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox
+    QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox, QComboBox
 )
 from PyQt5.QtCore import Qt
 import json
@@ -34,6 +34,11 @@ class BotConfigDialog(QDialog):
 
         self.user_agent_input = QLineEdit()
         form_layout.addRow("User-Agent:", self.user_agent_input)
+        
+        self.browser_combo = QComboBox()
+        self.browser_combo.addItems(["firefox", "chrome"])
+        form_layout.addRow("Browser:", self.browser_combo)
+
 
         self.headers_edit = QPlainTextEdit()
         self.headers_edit.setPlaceholderText('{\n    "Header-Name": "value"\n}')
@@ -69,6 +74,7 @@ class BotConfigDialog(QDialog):
                 self.headless_checkbox.setChecked(config.get("headless", False))
                 self.proxy_input.setText(config.get("proxy", ""))
                 self.user_agent_input.setText(config.get("user_agent", ""))
+                self.browser_combo.setCurrentText(config.get("browser", "firefox"))
                 headers = config.get("headers", {})
                 self.headers_edit.setPlainText(json.dumps(headers, indent=4))
             except Exception as e:
@@ -87,6 +93,7 @@ class BotConfigDialog(QDialog):
             "headless": self.headless_checkbox.isChecked(),
             "proxy": self.proxy_input.text().strip(),
             "user_agent": self.user_agent_input.text().strip(),
+            "browser": self.browser_combo.currentText(),
             "headers": headers
         }
         
