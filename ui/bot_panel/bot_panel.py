@@ -1,8 +1,10 @@
-from PyQt5.QtWidgets import QMessageBox, QTreeWidgetItem, QDialog
+from PyQt5.QtWidgets import QMessageBox, QTreeWidgetItem, QDialog, QFileDialog
+from PyQt5.QtCore import Qt
 from core.bot_core.bot_manager import BotManager
 from dialogs.bot_config_dialogs.bot_config_dialog import BotConfigDialog
 from dialogs.load_bots_dialog.load_bots_dialog import LoadBotsDialog
 from dialogs.apply_config_dialog.apply_config_dialog import ApplyConfigDialog
+from ui.bot_panel.bot_panelContextMenu import open_bot_context_menu
 import json
 import os
 
@@ -15,10 +17,14 @@ class BotPanelController:
 
     def _setup_connections(self):
         self.ui.btn_startBot.clicked.connect(self._handle_start_bot)
+        self.ui.btn_launchBot.clicked.connect(self._handle_launch_selected_bot)
         self.ui.btn_stopBot.clicked.connect(self.on_btn_stopBot_clicked)
         self.ui.btn_configureBot.clicked.connect(self._handle_configure_bot)
         self.ui.btn_loadBot.clicked.connect(self.on_btn_loadBot_clicked)
         self.ui.btn_applyConfig.clicked.connect(self.on_btn_applyConfig_clicked)
+        #CONTEXT MENU FOR BOT_WIDGET
+        self.ui.bot_Widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.bot_Widget.customContextMenuRequested.connect(self._handle_context_menu)
 
     def _handle_start_bot(self):
         print("[DEBUG] Start Bot button clicked.")
@@ -32,24 +38,34 @@ class BotPanelController:
         bot_id = self.bot_manager.start_bot(bot_type, config)
         if bot_id:
             print(f"[GUI] Bot {bot_id} successfully launched.")
-            item = QTreeWidgetItem([bot_id, "Running"])
+            bot_type = bot_id.split("_")[0]
+            item = QTreeWidgetItem([bot_type, bot_id, "Running"])
             self.ui.bot_Widget.addTopLevelItem(item)
         else:
             print("[GUI] Failed to start bot.")
             
+    def _handle_launch_selected_bot(self):
+        selected_items = self.ui.bot_Widget.selectedItems()
+        if not selected_items:
+            QMessageBox.warning(self.parent, "No Selection", "Please select a bot to launch.")
+            return
+
+        for item in selected_items:
+            self.launch_bot(item)
+    
     def on_btn_stopBot_clicked(self):
         selected_item = self.ui.bot_Widget.currentItem()
         if not selected_item:
             QMessageBox.warning(self.parent, "No Selection", "Please select a bot to stop.")
             return
 
-        bot_id = selected_item.text(0)
+        bot_id = selected_item.text(1)
         try:
             self.bot_manager.stop_bot(bot_id)
             QMessageBox.information(self.parent, "Success", f"Bot '{bot_id}' has been stopped.")
 
             # ✅ Обновляем статус во второй колонке
-            selected_item.setText(1, "Stopped")
+            selected_item.setText(2, "Stopped")
 
         except Exception as e:
             QMessageBox.critical(self.parent, "Error", f"Failed to stop bot '{bot_id}':\n{str(e)}")
@@ -60,7 +76,7 @@ class BotPanelController:
             QMessageBox.warning(self.parent, "No Selection", "Please select a bot.")
             return
 
-        bot_id = selected_item.text(0)
+        bot_id = selected_item.text(1)
         dialog = BotConfigDialog(bot_id=bot_id, parent=self.parent)
         if dialog.exec_() == QDialog.Accepted:
             config = dialog.get_config()
@@ -74,9 +90,10 @@ class BotPanelController:
         if dialog.exec_() == QDialog.Accepted:
             bot_ids = dialog.get_selected_bots()
             for bot_id in bot_ids:
-                item = QTreeWidgetItem([bot_id, "Ready"])
+                bot_type = bot_id.split("_")[0]
+                item = QTreeWidgetItem([bot_type, bot_id, "Ready"])
                 self.ui.bot_Widget.addTopLevelItem(item)
-                
+
                 
     def on_btn_applyConfig_clicked(self):
         dialog = ApplyConfigDialog(parent=self.parent)
@@ -94,13 +111,118 @@ class BotPanelController:
 
             # Применяем конфиг ко всем выделенным ботам
             for item in self.ui.bot_Widget.selectedItems():
-                bot_id = item.text(0)
+                bot_id = item.text(1)
                 config_path = os.path.join("data", "bots", bot_id, "config.json")
                 try:
                     with open(config_path, "w") as f:
                         json.dump(config, f, indent=4)
                 except Exception as e:
                     QMessageBox.warning(self.parent, "Error", f"Failed to apply config to {bot_id}:\n{str(e)}")
+                    
+    def _handle_context_menu(self, position):
+        callbacks = {
+            "launch": self.launch_bot,
+            "stop": self.stop_bot,
+            "configure": self.configure_bot,
+            "save_profile": self.save_bot_profile,
+            "load_profile": self.load_bot_profile,
+        }
+        open_bot_context_menu(self.parent, self.ui.bot_Widget, position, callbacks)
+        
+    def start_bot(self, item):
+        bot_id = item.text(1)
+
+        config_path = os.path.join("data", "bots", bot_id, "config.json")
+        if not os.path.exists(config_path):
+            QMessageBox.warning(self.parent, "Missing Config", f"No config found for bot: {bot_id}")
+            return
+
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+        except Exception as e:
+            QMessageBox.critical(self.parent, "Error", f"Failed to load config:\n{str(e)}")
+            return
+
+        # 🧠 Вот здесь вытаскиваем bot_type из bot_id
+        bot_type = bot_id.split("_")[0]  # 'xss-bot' из 'xss-bot_2025...'
+
+        self.bot_manager.start_bot(bot_type, config)
+
+    def stop_bot(self, item):
+        bot_id = item.text(1)
+        self.bot_manager.stop_bot(bot_id)
+        item.setText(2, "Stopped")
+        
+    def configure_bot(self, item):
+        bot_id = item.text(1)
+        dialog = BotConfigDialog(bot_id=bot_id, parent=self.parent)
+        dialog.exec_()
+
+    def save_bot_profile(self, item):
+        bot_id = item.text(1)
+        dialog = BotConfigDialog(bot_id=bot_id, parent=self.parent)
+        dialog.save_as_profile()
+
+    def load_bot_profile(self, item):
+        bot_id = item.text(1)
+
+        # Выбор JSON-файла с профилем
+        file_path, _ = QFileDialog.getOpenFileName(
+            self.parent,
+            "Load Profile",
+            "assets/bot_profiles/",
+            "JSON Files (*.json)"
+        )
+
+        if not file_path:
+            return
+
+        # Загружаем конфиг из профиля
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+        except Exception as e:
+            QMessageBox.critical(self.parent, "Error", f"Failed to load profile:\n{str(e)}")
+            return
+
+        # Путь до текущего бота
+        bot_config_path = os.path.join("data", "bots", bot_id, "config.json")
+        os.makedirs(os.path.dirname(bot_config_path), exist_ok=True)
+
+        try:
+            with open(bot_config_path, "w", encoding="utf-8") as f:
+                json.dump(config, f, indent=4)
+            QMessageBox.information(self.parent, "Success", f"Profile applied to bot:\n{bot_id}")
+        except Exception as e:
+            QMessageBox.critical(self.parent, "Error", f"Failed to apply config:\n{str(e)}")
+            
+    def launch_bot(self, item):
+        bot_id = item.text(1)
+        bot_type = bot_id.split("_")[0]
+
+        config_path = os.path.join("data", "bots", bot_id, "config.json")
+        if not os.path.exists(config_path):
+            QMessageBox.warning(self.parent, "Missing Config", f"No config found for bot: {bot_id}")
+            return
+
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+        except Exception as e:
+            QMessageBox.critical(self.parent, "Error", f"Failed to load config:\n{str(e)}")
+            return
+
+        # 🔥 вся логика проверки происходит внутри
+        self.bot_manager.start_existing_bot(bot_id, bot_type, config)
+
+        # 💡 можешь optionally обновить статус
+        item.setText(2, "Running")
+
+
+
+
+
 
 
 

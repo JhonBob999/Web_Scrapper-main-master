@@ -43,11 +43,14 @@ class BotConfigDialog(QDialog):
         btn_layout = QHBoxLayout()
         self.btn_save = QPushButton("Save")
         self.btn_cancel = QPushButton("Cancel")
+        self.btn_save_profile = QPushButton("Save as Profile")
         btn_layout.addWidget(self.btn_save)
         btn_layout.addWidget(self.btn_cancel)
+        btn_layout.addWidget(self.btn_save_profile)
 
         self.btn_save.clicked.connect(self.accept)
         self.btn_cancel.clicked.connect(self.reject)
+        self.btn_save_profile.clicked.connect(self.save_as_profile)
 
         # Main layout
         main_layout = QVBoxLayout()
@@ -86,3 +89,30 @@ class BotConfigDialog(QDialog):
             "user_agent": self.user_agent_input.text().strip(),
             "headers": headers
         }
+        
+    def save_as_profile(self):
+        from PyQt5.QtWidgets import QFileDialog
+        config = self.get_config()
+        if config is None:
+            return  # ошибка уже показана пользователю
+
+        default_path = os.path.join("assets", "bot_profiles")
+        os.makedirs(default_path, exist_ok=True)
+
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Profile As",
+            os.path.join(default_path, "profile.json"),
+            "JSON Files (*.json)"
+        )
+
+        if not file_path:
+            return
+
+        try:
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(config, f, indent=4)
+            QMessageBox.information(self, "Success", f"Profile saved to:\n{file_path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to save profile:\n{str(e)}")
+
