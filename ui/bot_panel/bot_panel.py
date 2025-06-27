@@ -10,6 +10,8 @@ from dialogs.apply_config_dialog.apply_config_dialog import ApplyConfigDialog
 from dialogs.log_viewer_dialog import LogViewerDialog
 from dialogs.bot_logs_dialog import BotLogsDialog
 from dialogs.js_selection_dialog import JsSelectionDialog
+from dialogs.create_bot_dialog.create_bot_dialog import CreateBotDialog
+from dialogs.crawler_config_dialog.crawler_config_dialog import CrawlerConfigDialog
 from ui.bot_panel.bot_panelContextMenu import open_bot_context_menu
 from ui.xss_controller import XssController
 from datetime import datetime
@@ -62,6 +64,7 @@ class BotPanelController:
         self.log_timer.setInterval(2000)  # 2 секунды
         self.log_timer.timeout.connect(self._update_bot_logs)
         self.current_log_path = None  # путь до logs.txt для выбранного бота
+
 
     def reload_crawler_tree(self):
         bot_id = self.get_selected_bot_id()  # ты должен сам реализовать эту функцию
@@ -278,38 +281,66 @@ class BotPanelController:
 
     def _handle_start_bot(self):
         print("[DEBUG] Start Bot button clicked.")
-        bot_type = "xss-bot"
+        dialog = CreateBotDialog(self.parent)
+        if dialog.exec_() == QDialog.Accepted:
+            bot_data = dialog.get_bot_data()
+            bot_type = bot_data["bot_type"]
+            bot_id = bot_data["bot_id"]
+            alias = bot_data["alias"]
+
+            print(f"[DEBUG] Creating bot: {bot_id} (type: {bot_type}, alias: {alias})")
+            self._create_bot_entry(bot_id, bot_type, alias)
+            
+    def _create_bot_entry(self, bot_id: str, bot_type: str, alias: str):
+        import shutil
+
+        bot_folder = os.path.join("data", "bots", bot_id)
+        os.makedirs(bot_folder, exist_ok=True)
+
+        # Конфиг по умолчанию
         config = {
-            "target": "http://localhost:8080/test3.html",
-            "param": "q",
-            "headless": True,
-            "profile_name": "default"
+            "target": "",
+            "depth": 1,
+            "profile_name": "default",
+            "headless": True
         }
 
-        bot_id = self.bot_manager.create_bot(bot_type, config)
-        if bot_id:
-            print(f"[GUI] Bot {bot_id} successfully launched.")
-            
-            alias = "New Bot"  # пока дефолт, потом сделаем окно
-            status = "Ready"
-            domain = config.get("target", "")
-            profile = config.get("profile_name", "default")
-            created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            comment = ""
+        config_path = os.path.join(bot_folder, "config.json")
+        with open(config_path, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=4)
 
-            item = QTreeWidgetItem([
-                bot_type, bot_id, alias, status, domain, profile, created, comment
-            ])
-            item.setFlags(item.flags() | Qt.ItemIsEditable)
+        # Пустой лог
+        open(os.path.join(bot_folder, "logs.txt"), "a").close()
+        os.makedirs(os.path.join(bot_folder, "extra_data"), exist_ok=True)
 
-            self.ui.bot_Widget.addTopLevelItem(item)
+        # 🔁 Копируем entrypoint.py в папку бота
+        entrypoint_src = os.path.join("bots", bot_type, "entrypoint.py")
+        entrypoint_dst = os.path.join(bot_folder, "entrypoint.py")
+        try:
+            shutil.copy(entrypoint_src, entrypoint_dst)
+            print(f"[INFO] Copied entrypoint from {entrypoint_src} to {entrypoint_dst}")
+        except Exception as e:
+            print(f"[ERROR] Failed to copy entrypoint.py: {e}")
 
-            # сохраняем статус
-            self.save_bot_status(bot_id, status, domain, comment, created)
+        # Визуально в таблицу
+        created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        status = "Ready"
+        domain = config["target"]
+        profile = config["profile_name"]
+        comment = ""
 
-        else:
-            print("[GUI] Failed to start bot.")
-            
+        item = QTreeWidgetItem([
+            bot_type, bot_id, alias, status, domain, profile, created, comment
+        ])
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
+
+        self.ui.bot_Widget.addTopLevelItem(item)
+
+        self.save_bot_status(bot_id, status, domain, comment, created)
+        print(f"[INFO] Bot '{bot_id}' created and added to table.")
+
+
+ 
     def _handle_launch_selected_bot(self):
         selected_items = self.ui.bot_Widget.selectedItems()
         if not selected_items:
@@ -380,10 +411,24 @@ class BotPanelController:
             return
 
         bot_id = selected_item.text(1)
-        dialog = BotConfigDialog(bot_id=bot_id, parent=self.parent)
+
+        # 🔧 Корректное извлечение bot_type
+        parts = bot_id.split("_")
+        bot_type = "_".join(parts[:2])  # Например: xss-bot, crawler_bot
+
+        # Выбор диалога по типу
+        if bot_type == "xss-bot":
+            dialog = BotConfigDialog(bot_id=bot_id, parent=self.parent)
+
+        elif bot_type == "crawler_bot":
+            dialog = CrawlerConfigDialog(bot_id=bot_id, parent=self.parent)
+
+        else:
+            QMessageBox.warning(self.parent, "Unsupported", f"No config dialog available for: {bot_type}")
+            return
 
         if dialog.exec_() == QDialog.Accepted:
-            # Загружаем config.json заново
+            # Загружаем config.json заново и обновляем таблицу
             config_path = os.path.join("data", "bots", bot_id, "config.json")
             if os.path.exists(config_path):
                 try:
@@ -401,6 +446,8 @@ class BotPanelController:
                 except Exception as e:
                     print(f"[ERROR] Failed to refresh UI after config: {e}")
 
+
+
                     
                     
     def on_btn_loadBot_clicked(self):
@@ -409,7 +456,8 @@ class BotPanelController:
             bot_ids = dialog.get_selected_bots()
 
             for bot_id in bot_ids:
-                bot_type = bot_id.split("_")[0]
+                parts = bot_id.split("_")
+                bot_type = "_".join(parts[:2])  # <-- фикс
                 status_path = f"data/bots/{bot_id}/status.json"
                 config_path = f"data/bots/{bot_id}/config.json"
 
@@ -516,7 +564,8 @@ class BotPanelController:
             return
 
         # 🧠 Вот здесь вытаскиваем bot_type из bot_id
-        bot_type = bot_id.split("_")[0]  # 'xss-bot' из 'xss-bot_2025...'
+        parts = bot_id.split("_")
+        bot_type = "_".join(parts[:2])  # <-- фикс
 
         self.bot_manager.start_bot(bot_type, config)
 
@@ -590,7 +639,9 @@ class BotPanelController:
             
     def launch_bot(self, item):
         bot_id = item.text(1)
-        bot_type = bot_id.split("_")[0]
+        
+        parts = bot_id.split("_")
+        bot_type = "_".join(parts[:2])  # <-- фикс
 
         config_path = os.path.join("data", "bots", bot_id, "config.json")
         if not os.path.exists(config_path):
