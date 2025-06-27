@@ -8,6 +8,7 @@ from datetime import datetime
 
 visited = set()
 crawl_result = {}
+js_links_found = set()
 
 def load_config():
     with open("config.json", "r", encoding="utf-8") as f:
@@ -29,6 +30,14 @@ def save_crawl_result():
         log("[INFO] Intermediate result saved.")
     except Exception as e:
         log(f"[ERROR] Failed to save crawl result: {e}")
+
+def save_js_list():
+    try:
+        with open("js_list.json", "w", encoding="utf-8") as f:
+            json.dump(sorted(js_links_found), f, indent=2)
+        log(f"[INFO] Found and saved {len(js_links_found)} JS files.")
+    except Exception as e:
+        log(f"[ERROR] Failed to save js_list.json: {e}")
 
 def crawl(url, base_url, base_netloc, depth, config):
     if depth < 0 or url in visited:
@@ -55,6 +64,12 @@ def crawl(url, base_url, base_netloc, depth, config):
         link = urljoin(url, a["href"])
         if is_internal(link, base_netloc):
             links.append(link)
+
+    # ✅ Extract JS <script src=...>
+    for script in soup.find_all("script", src=True):
+        js_link = urljoin(url, script["src"])
+        if is_internal(js_link, base_netloc):
+            js_links_found.add(js_link)
 
     page_key = url.replace(base_url, "") or "/"
     crawl_result.setdefault(base_url, {}).setdefault(page_key, [])
@@ -83,6 +98,7 @@ def main():
 
     log(f"[INFO] Starting crawl at {target} with depth={depth}")
     crawl(target, base_url, base_netloc, depth, config)
+    save_js_list()
     log("[INFO] Crawl finished. Final result already saved.")
 
 if __name__ == "__main__":
