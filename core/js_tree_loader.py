@@ -1,5 +1,7 @@
 import json
-from PyQt5.QtWidgets import QTreeWidgetItem
+from PyQt5.QtWidgets import QTreeWidgetItem, QApplication
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import Qt
 
 def load_domain_tree(tree_widget, json_path):
     """
@@ -34,3 +36,31 @@ def load_domain_tree(tree_widget, json_path):
             sub_item.addChild(script_item)
 
         tree_widget.addTopLevelItem(sub_item)
+        
+def load_js_tree_from_bot(js_data: list, config: dict, controller):
+    """
+    Если js_data — это просто список JS-файлов (list), то показываем их под общим доменом
+    """
+    controller.ui.tree_domain.clear()
+
+    domain_item = QTreeWidgetItem(["Collected JS Files"])
+    for js_url in js_data:
+        js_item = QTreeWidgetItem([js_url])
+        domain_item.addChild(js_item)
+
+    controller.ui.tree_domain.addTopLevelItem(domain_item)
+    controller.ui.tree_domain.expandAll()
+
+    # Установим target
+    target = config.get("target", "")
+    controller.ui.lineEditXssTarget.setText(target)
+
+    # Установим headers
+    headers = config.get("headers", {})
+    if hasattr(controller, "session_headers"):
+        controller.session_headers = headers
+    elif hasattr(controller, "set_headers"):
+        controller.set_headers(headers)
+
+
+

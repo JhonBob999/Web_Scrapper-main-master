@@ -708,7 +708,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(5)
-        self.tabWidgetExploits.setCurrentIndex(1)
+        self.tabWidgetExploits.setCurrentIndex(2)
         self.stackedWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 

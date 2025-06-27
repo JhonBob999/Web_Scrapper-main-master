@@ -56,8 +56,7 @@ class ScraperApp(QMainWindow):
         # Calendar Widget
         self.ui.action_open_calendar.triggered.connect(self.open_calendar_dialog)
 
-        #Bot panel
-        self.bot_panel_controller = BotPanelController(self.ui)
+        
 
         # Column settings
         self.load_column_widths()
@@ -129,6 +128,8 @@ class ScraperApp(QMainWindow):
         # Exploit/XSS Controller
         self.exploit_controller = ExploitController(self.ui)
         self.xss_controller = XssController(self.ui)
+        #Bot panel
+        self.bot_panel_controller = BotPanelController(self.ui, xss_controller=self.xss_controller)
         # Шпаргалка для JS XSS
         self.ui.btnXssHelp.clicked.connect(self.show_xss_cheatsheet)
 

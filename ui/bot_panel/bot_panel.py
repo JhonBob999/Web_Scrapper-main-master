@@ -1,21 +1,25 @@
 from PyQt5.QtWidgets import QMessageBox, QTreeWidgetItem, QDialog, QFileDialog, QLineEdit, QInputDialog
 from PyQt5.QtCore import Qt, QTimer
 from core.bot_core.bot_manager import BotManager
+from core.js_tree_loader import load_js_tree_from_bot
 from dialogs.bot_config_dialogs.bot_config_dialog import BotConfigDialog
 from dialogs.load_bots_dialog.load_bots_dialog import LoadBotsDialog
 from dialogs.apply_config_dialog.apply_config_dialog import ApplyConfigDialog
 from dialogs.log_viewer_dialog import LogViewerDialog
+from dialogs.js_selection_dialog import JsSelectionDialog
 from ui.bot_panel.bot_panelContextMenu import open_bot_context_menu
+from ui.xss_controller import XssController
 from datetime import datetime
 import json
 import os
 import shutil
 
 class BotPanelController:
-    def __init__(self, ui, parent=None):
+    def __init__(self, ui, parent=None, xss_controller=None):
         self.ui = ui  # ссылка на ui из Qt Designer
         self.parent = parent  # ✅ Сохраняем родителя
         self.bot_manager = BotManager()  # ✅ создаём объект
+        self.xss_controller = xss_controller
         self._setup_connections()
 
     def _setup_connections(self):
@@ -44,6 +48,79 @@ class BotPanelController:
         if bot_id:
             self.load_log_options(bot_id)
             self._start_log_monitoring(bot_id)
+            
+            
+    def _analyze_js_from_bot(self, item):
+
+
+        bot_id = item.text(1)
+        bot_path = os.path.join("data", "bots", bot_id)
+        js_path = os.path.join(bot_path, "extra_data", "js_list.json")
+        config_path = os.path.join(bot_path, "config.json")
+
+        if not os.path.exists(js_path):
+            QMessageBox.warning(self.ui.bot_Widget, "JS List Not Found", f"No js_list.json found for bot {bot_id}.")
+            return
+
+        try:
+            with open(js_path, "r", encoding="utf-8") as f:
+                js_data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.ui.bot_Widget, "Error", f"Failed to read js_list.json:\n{e}")
+            return
+
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                config_data = json.load(f)
+        except Exception:
+            config_data = {}
+
+        target = config_data.get("target", "unknown.local")
+        base_url = target if target.startswith("http") else f"http://{target}"
+
+        # ✅ Универсальный парсинг
+        if isinstance(js_data, list):
+            domain = target.replace("http://", "").replace("https://", "").split("/")[0]
+            js_urls = js_data
+        elif isinstance(js_data, dict):
+            domain, js_urls = next(iter(js_data.items()))
+        else:
+            QMessageBox.warning(self.ui.bot_Widget, "JS Format Error", "Invalid format in js_list.json")
+            return
+
+        dialog = JsSelectionDialog(domain=domain, js_urls=js_urls, base_url=base_url, parent=self.ui.bot_Widget)
+        dialog.exec_()
+
+
+            
+            
+    def _send_to_js_analyzer(self, item):
+        bot_id = item.text(1)  # Предположительно bot_id в колонке 1
+        bot_path = os.path.join("data", "bots", bot_id)
+        
+        config_path = os.path.join(bot_path, "config.json")
+        js_list_path = os.path.join(bot_path, "extra_data", "js_list.json")
+
+        if not os.path.exists(js_list_path):
+            QMessageBox.warning(self, "JS List Not Found", f"No js_list.json found for bot {bot_id}.")
+            return
+
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                config_data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self, "Config Load Error", f"Failed to load config.json: {e}")
+            return
+
+        try:
+            with open(js_list_path, "r", encoding="utf-8") as f:
+                js_list = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self, "JS List Load Error", f"Failed to load js_list.json: {e}")
+            return
+
+        # ✅ передаём в loader
+        load_js_tree_from_bot(js_list, config_data, self.xss_controller)
 
 
     def _handle_start_bot(self):
@@ -227,7 +304,9 @@ class BotPanelController:
             "save_profile": self.save_bot_profile,
             "load_profile": self.load_bot_profile,
             "rename": self.rename_bot,
-            "view_logs": self.open_log_viewer,
+            "send_to_js": self._send_to_js_analyzer,
+            "analyze_js": self._analyze_js_from_bot,
+            "view_logs": self.open_log_viewer
         }
         open_bot_context_menu(self.parent, self.ui.bot_Widget, position, callbacks)
         

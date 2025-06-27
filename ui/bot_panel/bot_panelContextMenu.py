@@ -14,6 +14,8 @@ def open_bot_context_menu(parent, tree_widget, position, callbacks: dict):
     action_save = QAction("Save as Profile", parent)
     action_load = QAction("Load Profile", parent)
     action_rename = QAction("Rename Bot", parent)
+    action_send_to_js = QAction("Send to JS Analyzer", parent)
+    action_analyze_js = QAction("Analyze JS Files", parent)
     action_log = QAction("View Logs", parent)
 
     # Привязываем действия
@@ -23,6 +25,8 @@ def open_bot_context_menu(parent, tree_widget, position, callbacks: dict):
     action_save.triggered.connect(lambda: callbacks["save_profile"](item))
     action_load.triggered.connect(lambda: callbacks["load_profile"](item))
     action_rename.triggered.connect(lambda: callbacks["rename"](item))
+    action_send_to_js.triggered.connect(lambda: callbacks["send_to_js"](item))
+    action_analyze_js.triggered.connect(lambda: callbacks["analyze_js"](item))
     action_log.triggered.connect(lambda: callbacks["view_logs"](item))
 
     # Добавляем в меню
@@ -33,6 +37,8 @@ def open_bot_context_menu(parent, tree_widget, position, callbacks: dict):
     menu.addAction(action_save)
     menu.addAction(action_load)
     menu.addAction(action_rename)
+    menu.addAction(action_send_to_js)
+    menu.addAction(action_analyze_js)
     menu.addAction(action_log)
 
     # Показываем меню
