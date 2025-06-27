@@ -13,6 +13,7 @@ from ui.bot_panel.bot_context_menu_handler import handle_context_menu
 from ui.bot_panel.bot_profile_handler import handle_apply_config
 from ui.bot_panel.bot_js_handler import analyze_js_from_bot, send_to_js_analyzer
 from ui.bot_panel.bot_table_utils import get_selected_bot_id, handle_load_bot
+from ui.bot_panel.bot_crawler_contextmenu import setup_crawler_context_menu
 
 
 class BotPanelController:
@@ -49,6 +50,8 @@ class BotPanelController:
         self.ui.bot_Widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.bot_Widget.customContextMenuRequested.connect(self._handle_context_menu)
         self.ui.bot_Widget.itemChanged.connect(self._handle_item_edited)
+        #CONTEXT MENU FOR CRAWLER_TREEWIDGET
+        setup_crawler_context_menu(self.ui.crawler_treeWidget)
         #PLAINTEXT LOGS BUTTONS
         self.ui.btn_saveLogs.clicked.connect(self._on_save_log_options)
         self.ui.btn_loadLogs.clicked.connect(self._handle_load_logs)
