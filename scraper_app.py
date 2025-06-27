@@ -28,7 +28,7 @@ from ui.scanner_ui.certificate_scanner import CertificateScanner
 from ui.exploit_controller import ExploitController
 from ui.xss_controller import XssController
 #Bot ui
-from ui.bot_panel.bot_panel import BotPanelController
+from ui.bot_panel.bot_panel_controler import BotPanelController
 # Utils import
 from utils.context_menu import show_context_menu
 # Dialog import
