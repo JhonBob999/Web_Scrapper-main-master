@@ -19,7 +19,7 @@ class CreateBotDialog(QDialog):
         # Bot Type
         self.layout.addWidget(QLabel("Select Bot Type:"))
         self.combo_bot_type = QComboBox()
-        self.combo_bot_type.addItems(["xss-bot", "crawler_bot"])  # Добавь свои типы
+        self.combo_bot_type.addItems(["xss-bot", "crawler-bot"])  # Добавь свои типы
         self.layout.addWidget(self.combo_bot_type)
 
         # Alias

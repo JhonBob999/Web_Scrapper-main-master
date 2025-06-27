@@ -1,4 +1,4 @@
-# bots/crawler_bot/entrypoint.py
+# bots/crawler-bot/entrypoint.py
 
 import os
 import json

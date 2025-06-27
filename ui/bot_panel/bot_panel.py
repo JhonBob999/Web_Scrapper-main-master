@@ -299,6 +299,7 @@ class BotPanelController:
 
         # Конфиг по умолчанию
         config = {
+            "bot_type": bot_type,
             "target": "",
             "depth": 1,
             "profile_name": "default",
@@ -413,14 +414,13 @@ class BotPanelController:
         bot_id = selected_item.text(1)
 
         # 🔧 Корректное извлечение bot_type
-        parts = bot_id.split("_")
-        bot_type = "_".join(parts[:2])  # Например: xss-bot, crawler_bot
+        bot_type = selected_item.text(0)
 
         # Выбор диалога по типу
         if bot_type == "xss-bot":
             dialog = BotConfigDialog(bot_id=bot_id, parent=self.parent)
 
-        elif bot_type == "crawler_bot":
+        elif bot_type == "crawler-bot":
             dialog = CrawlerConfigDialog(bot_id=bot_id, parent=self.parent)
 
         else:
@@ -456,12 +456,11 @@ class BotPanelController:
             bot_ids = dialog.get_selected_bots()
 
             for bot_id in bot_ids:
-                parts = bot_id.split("_")
-                bot_type = "_".join(parts[:2])  # <-- фикс
                 status_path = f"data/bots/{bot_id}/status.json"
                 config_path = f"data/bots/{bot_id}/config.json"
 
                 # Дефолты
+                bot_type = bot_id.split("_")[0]  # ← временный fallback, если config нет
                 status = "Running"
                 alias = "Loaded Bot"
                 domain = ""
@@ -563,9 +562,8 @@ class BotPanelController:
             QMessageBox.critical(self.parent, "Error", f"Failed to load config:\n{str(e)}")
             return
 
-        # 🧠 Вот здесь вытаскиваем bot_type из bot_id
-        parts = bot_id.split("_")
-        bot_type = "_".join(parts[:2])  # <-- фикс
+        # ✅ Берём bot_type из config, fallback — через bot_id
+        bot_type = config.get("bot_type", bot_id.split("_")[0])
 
         self.bot_manager.start_bot(bot_type, config)
 
@@ -639,9 +637,6 @@ class BotPanelController:
             
     def launch_bot(self, item):
         bot_id = item.text(1)
-        
-        parts = bot_id.split("_")
-        bot_type = "_".join(parts[:2])  # <-- фикс
 
         config_path = os.path.join("data", "bots", bot_id, "config.json")
         if not os.path.exists(config_path):
@@ -654,6 +649,9 @@ class BotPanelController:
         except Exception as e:
             QMessageBox.critical(self.parent, "Error", f"Failed to load config:\n{str(e)}")
             return
+
+        # ✅ Получаем bot_type из config.json, с fallback на bot_id
+        bot_type = config.get("bot_type", bot_id.split("_")[0])
 
         # 🔥 вся логика проверки происходит внутри
         self.bot_manager.start_existing_bot(bot_id, bot_type, config)
