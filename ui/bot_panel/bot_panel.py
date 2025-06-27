@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMessageBox, QTreeWidgetItem, QDialog, QFileDialog, QLineEdit, QInputDialog
 from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QTextCursor, QTextCharFormat
 from core.bot_core.bot_manager import BotManager
 from core.js_tree_loader import load_js_tree_from_bot
 from dialogs.bot_config_dialogs.bot_config_dialog import BotConfigDialog
@@ -14,6 +15,8 @@ from datetime import datetime
 import json
 import os
 import shutil
+import html
+import re
 
 class BotPanelController:
     def __init__(self, ui, parent=None, xss_controller=None):
@@ -46,6 +49,8 @@ class BotPanelController:
         self.ui.chkLogResponses.stateChanged.connect(self._handle_log_checkbox_changed)
         self.ui.chkLogConsole.stateChanged.connect(self._handle_log_checkbox_changed)
         self.ui.chkLogDockerEvents.stateChanged.connect(self._handle_log_checkbox_changed)
+        #QLineEdit search Logs
+        self.ui.line_searchLogs.textChanged.connect(self._handle_log_search)
         # Таймер для логов
         self.log_timer = QTimer()
         self.log_timer.setInterval(2000)  # 2 секунды
@@ -99,6 +104,81 @@ class BotPanelController:
             print(f"[LOG] log_options updated for {bot_id}")
         except Exception as e:
             print(f"[ERROR] Failed to save config: {e}")
+            
+    def _handle_log_search(self, text):
+        if not self.current_log_path or not os.path.exists(self.current_log_path):
+            return
+
+        try:
+            with open(self.current_log_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+
+            search_text = text.strip().lower()
+            self.ui.plainText_botLogs.clear()
+            
+            
+            match_count = 0
+
+            for line in lines:
+                line_clean = line.strip()
+                if not line_clean:
+                    continue
+
+                # Чекбоксы
+                if "[REQ]" in line_clean and not self.ui.chkLogRequests.isChecked():
+                    continue
+                if "[RESP]" in line_clean and not self.ui.chkLogResponses.isChecked():
+                    continue
+                if "[JS]" in line_clean and not self.ui.chkLogConsole.isChecked():
+                    continue
+                if "[DOCKER]" in line_clean and not self.ui.chkLogDockerEvents.isChecked():
+                    continue
+
+                # Поиск
+                if search_text and search_text not in line_clean.lower():
+                    continue
+
+                match_count += 1  # ← Увеличиваем счётчик
+
+                # Цвет по типу
+                if "[REQ]" in line_clean:
+                    color = "#3498db"
+                elif "[RESP]" in line_clean:
+                    color = "#2ecc71"
+                elif "[JS]" in line_clean:
+                    color = "#f1c40f"
+                elif "[DOCKER]" in line_clean:
+                    color = "#e67e22"
+                else:
+                    color = "#bdc3c7"
+
+                # Подсветка совпадений
+                original_line = line_clean
+                raw_lower = line_clean.lower()
+                highlighted = ""
+
+                if search_text:
+                    pattern = re.escape(search_text)
+                    matches = list(re.finditer(pattern, raw_lower))
+                    last_idx = 0
+                    for match in matches:
+                        start, end = match.span()
+                        highlighted += html.escape(original_line[last_idx:start])
+                        highlighted += f'<span style="background-color: yellow;">{html.escape(original_line[start:end])}</span>'
+                        last_idx = end
+                    highlighted += html.escape(original_line[last_idx:])
+                else:
+                    highlighted = html.escape(original_line)
+
+                html_line = f'<div style="color:{color}; margin-bottom:2px;">{highlighted}</div>'
+                self.ui.plainText_botLogs.appendHtml(html_line)
+
+            # Отображаем результат на LCD
+            self.ui.lcdMatchesFound.display(match_count)
+
+        except Exception as e:
+            print(f"[SEARCH ERROR] Failed to filter logs: {e}")
+            self.ui.lcdMatchesFound.display(0)
             
     def _analyze_js_from_bot(self, item):
         bot_id = item.text(1)
@@ -624,9 +704,24 @@ class BotPanelController:
             with open(self.current_log_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
-            # Фильтрация по чекбоксам
-            filtered_lines = []
+            self.ui.lcdTotalLines.display(len(lines))
+            self.ui.plainText_botLogs.clear()
+
+            req_count = 0
+            resp_count = 0
+
+
             for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+
+                if "[REQ]" in line:
+                    req_count += 1
+                if "[RESP]" in line:
+                    resp_count += 1
+
+                # Фильтрация по чекбоксам
                 if "[REQ]" in line and not self.ui.chkLogRequests.isChecked():
                     continue
                 if "[RESP]" in line and not self.ui.chkLogResponses.isChecked():
@@ -635,9 +730,26 @@ class BotPanelController:
                     continue
                 if "[DOCKER]" in line and not self.ui.chkLogDockerEvents.isChecked():
                     continue
-                filtered_lines.append(line)
 
-            self.ui.plainText_botLogs.setPlainText("".join(filtered_lines))
+                safe_line = html.escape(line)
+
+                if "[REQ]" in line:
+                    color = "#3498db"
+                elif "[RESP]" in line:
+                    color = "#2ecc71"
+                elif "[JS]" in line:
+                    color = "#f1c40f"
+                elif "[DOCKER]" in line:
+                    color = "#e67e22"
+                else:
+                    color = "#bdc3c7"
+
+                html_line = f'<div style="color:{color}; margin-bottom:2px;">{safe_line}</div>'
+                self.ui.plainText_botLogs.appendHtml(html_line)
+
+            # Обновляем LCD-счётчик [REQ]
+            self.ui.lcdReqCount.display(req_count)
+            self.ui.lcdRespCount.display(resp_count)
 
         except Exception as e:
             print(f"[LOG ERROR] Failed to read logs.txt: {e}")

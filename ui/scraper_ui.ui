@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1489</width>
-    <height>962</height>
+    <width>1820</width>
+    <height>1061</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -144,8 +144,8 @@ QToolBar::separator {
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>1489</width>
-      <height>1001</height>
+      <width>1771</width>
+      <height>991</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -1466,9 +1466,9 @@ QToolBar::separator {
       <property name="geometry">
        <rect>
         <x>820</x>
-        <y>30</y>
-        <width>661</width>
-        <height>841</height>
+        <y>0</y>
+        <width>941</width>
+        <height>941</height>
        </rect>
       </property>
       <property name="currentIndex">
@@ -1479,10 +1479,16 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>20</y>
+          <y>50</y>
           <width>651</width>
-          <height>731</height>
+          <height>741</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <bold>true</bold>
+         </font>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -1492,7 +1498,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>750</y>
+          <y>840</y>
           <width>301</width>
           <height>91</height>
          </rect>
@@ -1557,7 +1563,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>320</x>
-          <y>760</y>
+          <y>850</y>
           <width>111</width>
           <height>31</height>
          </rect>
@@ -1576,7 +1582,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>320</x>
-          <y>800</y>
+          <y>890</y>
           <width>111</width>
           <height>31</height>
          </rect>
@@ -1595,7 +1601,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>440</x>
-          <y>800</y>
+          <y>890</y>
           <width>131</width>
           <height>31</height>
          </rect>
@@ -1614,7 +1620,7 @@ QToolBar::separator {
         <property name="geometry">
          <rect>
           <x>440</x>
-          <y>760</y>
+          <y>850</y>
           <width>131</width>
           <height>31</height>
          </rect>
@@ -1627,6 +1633,127 @@ QToolBar::separator {
         </property>
         <property name="text">
          <string>Resume Logs</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="line_searchLogs">
+        <property name="geometry">
+         <rect>
+          <x>140</x>
+          <y>800</y>
+          <width>291</width>
+          <height>31</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>800</y>
+          <width>141</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>SEARCH LOGS:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_allLogs">
+        <property name="geometry">
+         <rect>
+          <x>670</x>
+          <y>80</y>
+          <width>71</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>All Logs</string>
+        </property>
+       </widget>
+       <widget class="QLCDNumber" name="lcdTotalLines">
+        <property name="geometry">
+         <rect>
+          <x>800</x>
+          <y>80</y>
+          <width>64</width>
+          <height>23</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_5">
+        <property name="geometry">
+         <rect>
+          <x>670</x>
+          <y>110</y>
+          <width>51</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>[REQ]</string>
+        </property>
+       </widget>
+       <widget class="QLCDNumber" name="lcdReqCount">
+        <property name="geometry">
+         <rect>
+          <x>800</x>
+          <y>110</y>
+          <width>64</width>
+          <height>23</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_respCount">
+        <property name="geometry">
+         <rect>
+          <x>670</x>
+          <y>140</y>
+          <width>61</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>[RESP]</string>
+        </property>
+       </widget>
+       <widget class="QLCDNumber" name="lcdRespCount">
+        <property name="geometry">
+         <rect>
+          <x>800</x>
+          <y>140</y>
+          <width>64</width>
+          <height>23</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLCDNumber" name="lcdMatchesFound">
+        <property name="geometry">
+         <rect>
+          <x>800</x>
+          <y>50</y>
+          <width>64</width>
+          <height>23</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_matchesFound">
+        <property name="geometry">
+         <rect>
+          <x>670</x>
+          <y>50</y>
+          <width>131</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Matches found</string>
         </property>
        </widget>
       </widget>
