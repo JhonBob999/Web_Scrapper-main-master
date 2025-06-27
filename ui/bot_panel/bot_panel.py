@@ -29,6 +29,7 @@ class BotPanelController:
         self.ui.btn_configureBot.clicked.connect(self._handle_configure_bot)
         self.ui.btn_loadBot.clicked.connect(self.on_btn_loadBot_clicked)
         self.ui.btn_applyConfig.clicked.connect(self.on_btn_applyConfig_clicked)
+        self.ui.btn_deleteBot.clicked.connect(self._handle_delete_bot)
         #CONTEXT MENU FOR BOT_WIDGET
         self.ui.bot_Widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.bot_Widget.customContextMenuRequested.connect(self._handle_context_menu)
@@ -133,7 +134,7 @@ class BotPanelController:
             "profile_name": "default"
         }
 
-        bot_id = self.bot_manager.start_bot(bot_type, config)
+        bot_id = self.bot_manager.create_bot(bot_type, config)
         if bot_id:
             print(f"[GUI] Bot {bot_id} successfully launched.")
             
@@ -182,6 +183,43 @@ class BotPanelController:
 
         except Exception as e:
             QMessageBox.critical(self.parent, "Error", f"Failed to stop bot '{bot_id}':\n{str(e)}")
+            
+            
+    def _handle_delete_bot(self):
+        selected_item = self.ui.bot_Widget.currentItem()
+        if not selected_item:
+            QMessageBox.warning(self.parent, "No Selection", "Please select a bot to delete.")
+            return
+
+        bot_id = selected_item.text(1)
+
+        confirm = QMessageBox.question(
+            self.parent,
+            "Confirm Deletion",
+            f"Are you sure you want to delete bot '{bot_id}'?\nThis will stop the bot and remove all its data.",
+            QMessageBox.Yes | QMessageBox.No
+        )
+
+        if confirm != QMessageBox.Yes:
+            return
+
+        try:
+            # Остановить Docker (если работает)
+            self.bot_manager.stop_bot(bot_id)
+
+            # Удалить папку бота
+            bot_path = os.path.join("data", "bots", bot_id)
+            shutil.rmtree(bot_path, ignore_errors=True)
+
+            # Удалить строку из таблицы
+            index = self.ui.bot_Widget.indexOfTopLevelItem(selected_item)
+            self.ui.bot_Widget.takeTopLevelItem(index)
+
+            QMessageBox.information(self.parent, "Bot Deleted", f"Bot '{bot_id}' was deleted successfully.")
+
+        except Exception as e:
+            QMessageBox.critical(self.parent, "Error", f"Failed to delete bot '{bot_id}':\n{e}")
+
             
     def _handle_configure_bot(self):
         selected_item = self.ui.bot_Widget.currentItem()

@@ -27,6 +27,20 @@ class BotManager:
     def _generate_bot_id(self, bot_type: str) -> str:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"{bot_type}_{timestamp}"
+    
+    def create_bot(self, bot_type: str, config: dict) -> str:
+        bot_id = self._generate_bot_id(bot_type)
+        print(f"[DEBUG] Creating bot without launch: {bot_id}")
+
+        bot_folder = os.path.join(self.bots_data_path, bot_id)
+        os.makedirs(os.path.join(bot_folder, "extra_data"), exist_ok=True)
+        open(os.path.join(bot_folder, "logs.txt"), "a").close()
+
+        config_path = os.path.join(bot_folder, "config.json")
+        with open(config_path, "w") as f:
+            json.dump(config, f, indent=4)
+
+        return bot_id   
 
     def start_bot(self, bot_type: str, config: dict) -> str:
         bot_id = self._generate_bot_id(bot_type)
