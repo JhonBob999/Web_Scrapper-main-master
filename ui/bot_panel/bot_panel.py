@@ -6,6 +6,7 @@ from dialogs.bot_config_dialogs.bot_config_dialog import BotConfigDialog
 from dialogs.load_bots_dialog.load_bots_dialog import LoadBotsDialog
 from dialogs.apply_config_dialog.apply_config_dialog import ApplyConfigDialog
 from dialogs.log_viewer_dialog import LogViewerDialog
+from dialogs.bot_logs_dialog import BotLogsDialog
 from dialogs.js_selection_dialog import JsSelectionDialog
 from ui.bot_panel.bot_panelContextMenu import open_bot_context_menu
 from ui.xss_controller import XssController
@@ -30,6 +31,9 @@ class BotPanelController:
         self.ui.btn_loadBot.clicked.connect(self.on_btn_loadBot_clicked)
         self.ui.btn_applyConfig.clicked.connect(self.on_btn_applyConfig_clicked)
         self.ui.btn_deleteBot.clicked.connect(self._handle_delete_bot)
+        self.ui.btn_pauseLogs.clicked.connect(self._handle_pause_logs)
+        self.ui.btn_resumeLogs.clicked.connect(self._handle_resume_logs)
+
         #CONTEXT MENU FOR BOT_WIDGET
         self.ui.bot_Widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.bot_Widget.customContextMenuRequested.connect(self._handle_context_menu)
@@ -37,6 +41,11 @@ class BotPanelController:
         #PLAINTEXT LOGS BUTTONS
         self.ui.btn_saveLogs.clicked.connect(self._on_save_log_options)
         self.ui.btn_loadLogs.clicked.connect(self._load_log_interface)
+        #ComboBox logs
+        self.ui.chkLogRequests.stateChanged.connect(self._handle_log_checkbox_changed)
+        self.ui.chkLogResponses.stateChanged.connect(self._handle_log_checkbox_changed)
+        self.ui.chkLogConsole.stateChanged.connect(self._handle_log_checkbox_changed)
+        self.ui.chkLogDockerEvents.stateChanged.connect(self._handle_log_checkbox_changed)
         # Таймер для логов
         self.log_timer = QTimer()
         self.log_timer.setInterval(2000)  # 2 секунды
@@ -50,10 +59,48 @@ class BotPanelController:
             self.load_log_options(bot_id)
             self._start_log_monitoring(bot_id)
             
+    def _handle_pause_logs(self):
+        self.log_timer.stop()
+        print("[LOG] Log updates paused.")
+
+    def _handle_resume_logs(self):
+        if self.current_log_path and os.path.exists(self.current_log_path):
+            self.log_timer.start()
+            print("[LOG] Log updates resumed.")
+        else:
+            QMessageBox.warning(self.parent, "Log File Missing", "No log file is currently selected or it was deleted.")
+            
+    def _handle_log_checkbox_changed(self):
+        bot_id = self.get_selected_bot_id()
+        if not bot_id:
+            return
+
+        config_path = f"data/bots/{bot_id}/config.json"
+        if not os.path.exists(config_path):
+            return
+
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+        except Exception as e:
+            print(f"[ERROR] Failed to load config for checkbox change: {e}")
+            return
+
+        config["log_options"] = {
+            "requests": self.ui.chkLogRequests.isChecked(),
+            "responses": self.ui.chkLogResponses.isChecked(),
+            "console": self.ui.chkLogConsole.isChecked(),
+            "docker": self.ui.chkLogDockerEvents.isChecked()
+        }
+
+        try:
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump(config, f, indent=4)
+            print(f"[LOG] log_options updated for {bot_id}")
+        except Exception as e:
+            print(f"[ERROR] Failed to save config: {e}")
             
     def _analyze_js_from_bot(self, item):
-
-
         bot_id = item.text(1)
         bot_path = os.path.join("data", "bots", bot_id)
         js_path = os.path.join(bot_path, "extra_data", "js_list.json")
@@ -522,7 +569,7 @@ class BotPanelController:
             QMessageBox.warning(self.parent, "No Logs", f"No logs found for bot: {bot_id}")
             return
 
-        dialog = LogViewerDialog(bot_id, log_path, parent=self.parent)
+        dialog = BotLogsDialog(bot_id, log_path, parent=self.parent)
         dialog.exec_()
         
     def load_log_options(self, bot_id: str):
@@ -575,10 +622,26 @@ class BotPanelController:
 
         try:
             with open(self.current_log_path, "r", encoding="utf-8") as f:
-                content = f.read()
-                self.ui.plainText_botLogs.setPlainText(content)
+                lines = f.readlines()
+
+            # Фильтрация по чекбоксам
+            filtered_lines = []
+            for line in lines:
+                if "[REQ]" in line and not self.ui.chkLogRequests.isChecked():
+                    continue
+                if "[RESP]" in line and not self.ui.chkLogResponses.isChecked():
+                    continue
+                if "[JS]" in line and not self.ui.chkLogConsole.isChecked():
+                    continue
+                if "[DOCKER]" in line and not self.ui.chkLogDockerEvents.isChecked():
+                    continue
+                filtered_lines.append(line)
+
+            self.ui.plainText_botLogs.setPlainText("".join(filtered_lines))
+
         except Exception as e:
             print(f"[LOG ERROR] Failed to read logs.txt: {e}")
+
             
     def _start_log_monitoring(self, bot_id: str):
         self.current_log_path = f"data/bots/{bot_id}/logs.txt"

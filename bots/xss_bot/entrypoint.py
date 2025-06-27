@@ -1,3 +1,4 @@
+
 # entrypoint.py — Bot Informer (Logger)
 
 import json
@@ -5,7 +6,6 @@ import os
 from datetime import datetime
 from seleniumwire import webdriver
 from selenium.webdriver.firefox.options import Options
-
 
 
 def log(text, level="INFO"):
@@ -35,7 +35,6 @@ def main():
 
     log(f"Starting bot for: {target}")
 
-    # Select browser
     driver = None
     try:
         if browser == "chrome":
@@ -57,10 +56,11 @@ def main():
         driver.get(target)
         log(f"Visited {target}")
 
-        if log_options.get("requests", True):
-            for req in driver.requests:
-                if req.response:
+        for req in driver.requests:
+            if req.response:
+                if log_options.get("requests", True):
                     log(f"REQ: {req.method} {req.url}", "REQ")
+                if log_options.get("responses", True):
                     log(f"RESP: {req.response.status_code} {req.response.headers.get('Content-Type')}", "RESP")
 
         js_files = [r.url for r in driver.requests if r.url.endswith(".js")]

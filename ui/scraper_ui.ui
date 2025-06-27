@@ -1591,11 +1591,11 @@ QToolBar::separator {
          <string>Load Logs</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="btn_pauseLogs">
         <property name="geometry">
          <rect>
           <x>440</x>
-          <y>760</y>
+          <y>800</y>
           <width>131</width>
           <height>31</height>
          </rect>
@@ -1610,11 +1610,11 @@ QToolBar::separator {
          <string>Pause Logs</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="btn_resumeLogs">
         <property name="geometry">
          <rect>
           <x>440</x>
-          <y>800</y>
+          <y>760</y>
           <width>131</width>
           <height>31</height>
          </rect>
