@@ -18,6 +18,14 @@ def is_internal(link, base_netloc):
     parsed = urlparse(link)
     return parsed.netloc == "" or parsed.netloc == base_netloc
 
+def save_crawl_result():
+    try:
+        with open("crawl_result.json", "w", encoding="utf-8") as f:
+            json.dump(crawl_result, f, indent=2)
+        print("[INFO] Intermediate result saved.")
+    except Exception as e:
+        print(f"[ERROR] Failed to save crawl result: {e}")
+
 def crawl(url, base_url, base_netloc, depth):
     if depth < 0 or url in visited:
         return
@@ -37,11 +45,16 @@ def crawl(url, base_url, base_netloc, depth):
         if is_internal(link, base_netloc):
             links.append(link)
 
-    crawl_result.setdefault(base_url, {}).setdefault(url.replace(base_url, "") or "/", [])
+    page_key = url.replace(base_url, "") or "/"
+    crawl_result.setdefault(base_url, {}).setdefault(page_key, [])
+
     for link in links:
         path = link.replace(base_url, "")
-        if path not in crawl_result[base_url][url.replace(base_url, "") or "/"]:
-            crawl_result[base_url][url.replace(base_url, "") or "/"].append(path)
+        if path not in crawl_result[base_url][page_key]:
+            crawl_result[base_url][page_key].append(path)
+
+    # 🧠 Save intermediate result
+    save_crawl_result()
 
     for link in links:
         crawl(link, base_url, base_netloc, depth - 1)
@@ -61,9 +74,7 @@ def main():
     print(f"[INFO] Starting crawl at {target} with depth={depth}")
     crawl(target, base_url, base_netloc, depth)
 
-    with open("crawl_result.json", "w", encoding="utf-8") as f:
-        json.dump(crawl_result, f, indent=2)
-    print("[INFO] Crawl finished. Result saved to crawl_result.json")
+    print("[INFO] Crawl finished. Final result already saved.")
 
 if __name__ == "__main__":
     main()
