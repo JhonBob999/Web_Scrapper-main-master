@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QTextCursor, QTextCharFormat
 from core.bot_core.bot_manager import BotManager
 from core.js_tree_loader import load_js_tree_from_bot
+from core.crawler_view_loader import load_crawl_result, search_in_tree, clear_filter
 from dialogs.bot_config_dialogs.bot_config_dialog import BotConfigDialog
 from dialogs.load_bots_dialog.load_bots_dialog import LoadBotsDialog
 from dialogs.apply_config_dialog.apply_config_dialog import ApplyConfigDialog
@@ -36,6 +37,11 @@ class BotPanelController:
         self.ui.btn_deleteBot.clicked.connect(self._handle_delete_bot)
         self.ui.btn_pauseLogs.clicked.connect(self._handle_pause_logs)
         self.ui.btn_resumeLogs.clicked.connect(self._handle_resume_logs)
+        # Привязка кнопки загрузки дерева
+        self.ui.btn_reloadCrawlTree.clicked.connect(self.reload_crawler_tree)
+        # Привязка поиска
+        self.ui.line_searchCrawlerTree.textChanged.connect(self.search_crawler_tree)
+        self.ui.btn_clearFilter.clicked.connect(self.clear_crawler_tree_filter)
 
         #CONTEXT MENU FOR BOT_WIDGET
         self.ui.bot_Widget.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -57,6 +63,25 @@ class BotPanelController:
         self.log_timer.timeout.connect(self._update_bot_logs)
         self.current_log_path = None  # путь до logs.txt для выбранного бота
 
+    def reload_crawler_tree(self):
+        bot_id = self.get_selected_bot_id()  # ты должен сам реализовать эту функцию
+        if not bot_id:
+            return
+        load_crawl_result(bot_id, self.ui.crawler_treeWidget)
+
+    def search_crawler_tree(self):
+        search_in_tree(self.ui.crawler_treeWidget, self.ui.line_searchCrawlerTree.text())
+
+    def clear_crawler_tree_filter(self):
+        self.ui.line_searchCrawlerTree.clear()
+        clear_filter(self.ui.crawler_treeWidget)
+        
+    def get_selected_bot_id(self):
+        selected = self.ui.bot_Widget.selectedItems()
+        if not selected:
+            return None
+        return selected[0].text(1)  # если bot_id во 2-й колонке (index 1)
+    
 
     def _load_log_interface(self):
         bot_id = self.get_selected_bot_id()
