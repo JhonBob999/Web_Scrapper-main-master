@@ -29,10 +29,19 @@ def handle_configure_bot(ui, parent):
 
 def configure_bot(item: QTreeWidgetItem, parent):
     bot_id = item.text(1)
-    dialog = BotConfigDialog(bot_id=bot_id, parent=parent)
+    bot_type = item.text(0)
+
+    if bot_type == "xss-bot":
+        dialog = BotConfigDialog(bot_id=bot_id, parent=parent)
+    elif bot_type == "crawler-bot":
+        dialog = CrawlerConfigDialog(bot_id=bot_id, parent=parent)
+    else:
+        QMessageBox.warning(parent, "Unsupported", f"No config dialog available for: {bot_type}")
+        return
 
     if dialog.exec_() == dialog.Accepted:
         _refresh_ui_columns_from_config(item, bot_id)
+
 
 
 def _refresh_ui_columns_from_config(item: QTreeWidgetItem, bot_id: str):

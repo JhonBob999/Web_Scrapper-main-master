@@ -29,7 +29,13 @@ def create_bot_entry(ui, bot_id: str, bot_type: str, alias: str):
         "target": "",
         "depth": 1,
         "profile_name": "default",
-        "headless": True
+        "headless": True,
+        "log_options": {
+            "requests": True,
+            "responses": True,
+            "console": False,
+            "docker": False
+        }
     }
 
     config_path = os.path.join(bot_folder, "config.json")

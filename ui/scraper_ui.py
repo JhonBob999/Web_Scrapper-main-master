@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1868, 978)
+        MainWindow.resize(1774, 978)
         MainWindow.setStyleSheet("/* Основное окно и вкладки */\n"
 "QMainWindow {\n"
 "    background-color: #f4f7f6;\n"
